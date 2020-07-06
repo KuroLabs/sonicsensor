@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app</title>
+</head>
+
+<body>
+  <button id="messageButton">Send Message</button>
+
+
+  <!-- FROM app/ -->
+  <!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
+  <script src="./scriptBundle.js"></script>
+
+  <!-- CUSTOM -->
+  <script>
+    
+    // GAINVAL, FREQERR
+    window.PARAMS = {
+      THRESHOLD: -65,
+      TIMEOUT: 550
+    }
+
+    const {
+      SonicServer,
+      SonicSocket
+    } = Sonic;
+    var ALPHABET = 'ABC123';
+
+
+    //SENDING SIDE
+    var MESSAGE = 'A12';
+    messageButton.onclick = function () {
+      ssocket = new SonicSocket({
+        alphabet: ALPHABET,
+        charDuration: 0.3
+      });
+      console.log("SENDING")
+      ssocket.send(MESSAGE);
+    }
+
+    //RECEIVING SIDE
+    sserver = new SonicServer({
+      alphabet: ALPHABET
+    });
+    sserver.setDebug(true)
+
+    sserver.on('message', function (message) {
+      console.log(message);
+    });
+
+    sserver.start();
+  </script>
+
+</body>
+
+</html>
