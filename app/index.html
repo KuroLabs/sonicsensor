@@ -9,19 +9,25 @@
 
 <body>
   <button id="messageButton">Send Message</button>
+  <button id="vibrate">Vibrate</button>
 
 
   <!-- FROM app/ -->
   <!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
+  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+
   <script src="./scriptBundle.js"></script>
 
   <!-- CUSTOM -->
   <script>
-    
+
     // GAINVAL, FREQERR
     window.PARAMS = {
       THRESHOLD: -65,
-      TIMEOUT: 550
+      TIMEOUT: 550,
+      FREQMIN: 15000,
+      FREQMAX: 15500
     }
 
     const {
@@ -30,16 +36,50 @@
     } = Sonic;
     var ALPHABET = 'ABC123';
 
+    var heartBeat = 0;
+
+    var vibrateInterval;
+
+    // Starts vibration at passed in level
+    function startVibrate(duration) {
+      if (+new Date() - heartBeat == 3000) {
+        stopVibrate();
+        return;
+      }
+      navigator.vibrate(duration);
+    }
+
+    // Stops vibration
+    function stopVibrate() {
+      // Clear interval and stop persistent vibrating
+      if (vibrateInterval) clearInterval(vibrateInterval);
+      navigator.vibrate(0);
+    }
+
+    // Start persistent vibration at given duration and interval
+    // Assumes a number value is given
+    function startPersistentVibrate(duration, interval) {
+      vibrateInterval = setInterval(function () {
+        startVibrate(duration);
+      }, interval);
+    }
 
     //SENDING SIDE
     var MESSAGE = 'A12';
+    vibrate.onclick = function () {
+      navigator.vibrate(2000);
+
+
+    }
     messageButton.onclick = function () {
       ssocket = new SonicSocket({
         alphabet: ALPHABET,
         charDuration: 0.3
       });
       console.log("SENDING")
-      ssocket.send(MESSAGE);
+      setInterval(() => {
+        ssocket.send(MESSAGE);
+      }, 4000)
     }
 
     //RECEIVING SIDE
@@ -49,7 +89,9 @@
     sserver.setDebug(true)
 
     sserver.on('message', function (message) {
-      console.log(message);
+      heartBeat = + new Date();
+      console.log("mynigga")
+      startVibrate(1000, 500);
     });
 
     sserver.start();

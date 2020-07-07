@@ -15,7 +15,7 @@ function SonicSocket(params) {
   this.coder = params.coder || new SonicCoder();
   this.charDuration = params.charDuration || 0.2;
   this.coder = params.coder || new SonicCoder(params);
-  this.rampDuration = params.rampDuration || 0.07;
+  this.rampDuration = params.rampDuration || 0.001;
 }
 
 
