@@ -71,8 +71,8 @@
 
       function SonicCoder(params) {
         params = params || {};
-        this.freqMin = params.freqMin || 15000;
-        this.freqMax = params.freqMax || 15500;
+        this.freqMin = params.freqMin || 18000;
+        this.freqMax = params.freqMax || 18500;
         this.freqError = params.freqError || window.PARAMS.FREQERR || 50;
         this.alphabetString = params.alphabet || ALPHABET;
         this.startChar = params.startChar || '^';
@@ -255,8 +255,15 @@
           }
         }
         // Only care about sufficiently tall peaks.
+        console.log(max);
         if (max > this.peakThreshold) {
-          return this.indexToFreq(index);
+          let f = this.indexToFreq(index);
+          document.querySelector("p").innerHTML = "oops never met" + f;
+
+          if (f > 18000 && f <= 19000) {
+            document.querySelector("p").innerHTML = f;
+            return f;
+          }
         }
         return null;
       };
@@ -463,6 +470,7 @@
         for (var i = 0; i < input.length; i++) {
           var char = input[i];
           var freq = this.coder.charToFreq(char);
+          console.log(char, freq);
           var time = audioContext.currentTime + this.charDuration * i;
           this.scheduleToneAt(freq, time, this.charDuration);
         }
