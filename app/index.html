@@ -2,101 +2,101 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>app</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>app</title>
 </head>
 
 <body>
-  <button id="messageButton">Send Message</button>
-  <button id="vibrate">Vibrate</button>
-  <br>
-  <p style="font-weight: 900;font-size: 3rem; text-align: center;"></p>
+	<button id="messageButton">Send Message</button>
+	<button id="vibrate">Vibrate</button>
+	<br>
+	<p id="debugfreq" style="font-weight: 900;font-size: 3rem; text-align: center;"></p>
 
-  <!-- FROM app/ -->
-  <!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
-  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
+	<!-- MOBILE DEBUGGING -->
+	<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+	<script>
+		eruda.init();
+	</script>
 
-  <script src="./scriptBundle.js"></script>
+	<!-- FROM app/ -->
+	<!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
+	<script src="./scriptBundle.js"></script>
+	<!-- CUSTOM -->
+	<script>
+		// GAINVAL
+		window.PARAMS = {
+			ALPHABET: 'ABC123',
+			CHAR_DURATION: 0.3,
+			RAMP_DURATION: 0.09,
+			THRESHOLD: -65, // -65 - APP | +100 - FFT
+			TIMEOUT: 550,
+			FREQMIN: 17500,
+			FREQMAX: 18500,
+			FREQERR: 50,
+		}
 
-  <!-- CUSTOM -->
-  <script>
+		const {
+			SonicServer,
+			SonicSocket
+		} = Sonic;
 
-    // GAINVAL, FREQERR
-    window.PARAMS = {
-      THRESHOLD: -65,
-      TIMEOUT: 550,
-      FREQMIN: 14000,
-      FREQMAX: 14500
-    }
+		var heartBeat = 0;
+		var vibrateInterval;
 
-    const {
-      SonicServer,
-      SonicSocket
-    } = Sonic;
-    var ALPHABET = 'ABC123';
+		// Starts vibration at passed in level
+		function startVibrate(duration) {
+			if (+new Date() - heartBeat == 3000) {
+				stopVibrate();
+				return;
+			}
+			navigator.vibrate(duration);
+		}
 
-    var heartBeat = 0;
+		// Stops vibration
+		function stopVibrate() {
+			// Clear interval and stop persistent vibrating
+			if (vibrateInterval) clearInterval(vibrateInterval);
+			navigator.vibrate(0);
+		}
 
-    var vibrateInterval;
+		// Start persistent vibration at given duration and interval
+		// Assumes a number value is given
+		function startPersistentVibrate(duration, interval) {
+			vibrateInterval = setInterval(function () {
+				startVibrate(duration);
+			}, interval);
+		}
 
-    // Starts vibration at passed in level
-    function startVibrate(duration) {
-      if (+new Date() - heartBeat == 3000) {
-        stopVibrate();
-        return;
-      }
-      navigator.vibrate(duration);
-    }
+		//SENDING SIDE
+		var MESSAGE = 'A12';
+		vibrate.onclick = function () {
+			navigator.vibrate(2000);
+		}
 
-    // Stops vibration
-    function stopVibrate() {
-      // Clear interval and stop persistent vibrating
-      if (vibrateInterval) clearInterval(vibrateInterval);
-      navigator.vibrate(0);
-    }
+		messageButton.onclick = function () {
+			ssocket = new SonicSocket();
+			console.log("SENDING")
+			ssocket.send(MESSAGE);
 
-    // Start persistent vibration at given duration and interval
-    // Assumes a number value is given
-    function startPersistentVibrate(duration, interval) {
-      vibrateInterval = setInterval(function () {
-        startVibrate(duration);
-      }, interval);
-    }
+			// // SEND CONTINUOUSLY
+			// setInterval(() => {
+			//   ssocket.send(MESSAGE);
+			// }, 4000)
+		}
 
-    //SENDING SIDE
-    var MESSAGE = 'A12';
-    vibrate.onclick = function () {
-      navigator.vibrate(2000);
+		//RECEIVING SIDE
+		sserver = new SonicServer();
+		sserver.setDebug(true)
 
+		sserver.on('message', function (message) {
+			heartBeat = +new Date();
+			console.log("MESSAGE RECV")
+			startVibrate(1000, 500);
+		});
 
-    }
-    messageButton.onclick = function () {
-      ssocket = new SonicSocket({
-        alphabet: ALPHABET,
-        charDuration: 0.3
-      });
-      console.log("SENDING")
-      setInterval(() => {
-        ssocket.send(MESSAGE);
-      }, 4000)
-    }
-
-    //RECEIVING SIDE
-    sserver = new SonicServer({
-      alphabet: ALPHABET
-    });
-    sserver.setDebug(true)
-
-    sserver.on('message', function (message) {
-      heartBeat = + new Date();
-      console.log("mynigga")
-      startVibrate(1000, 500);
-    });
-
-    sserver.start();
-  </script>
+		sserver.start();
+	</script>
 
 </body>
 

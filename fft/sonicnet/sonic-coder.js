@@ -57,5 +57,3 @@ SonicCoder.prototype.freqToChar = function (freq) {
 	var index = Math.round(this.alphabet.length * percent);
 	return this.alphabet[index];
 };
-
-module.exports = SonicCoder;
