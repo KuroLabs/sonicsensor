@@ -1,7 +1,17 @@
 let mic, fft, coder
 
-function preload() {
-	//sound = loadSound('sound.wav');
+// Decoded String
+let payload = "";
+
+// Sound generated is recorded as Buffer
+var songBuffer = null;
+
+function preRun(data) {
+	let ssocket = new SonicSocket();
+	const audioBuffer = ssocket.send(data);
+	audioBuffer.startRendering().then(renderedBuffer => {
+		songBuffer = renderedBuffer;
+	}).catch(err => console.log("Render Failed"+err))
 }
 
 function clamp(value, min, max) {
@@ -58,6 +68,23 @@ function draw() {
 			document.querySelector("#debugfreq").innerHTML = f;
 			var decodedChar = coder.freqToChar(f);
 			console.log(decodedChar);
+			
+			// Monitors for payload
+			if(decodedChar == "^"){
+				payload = "^";
+			} else if(decodedChar == "$"){
+				console.log("check",payload);
+				if(stringSimilarity.compareTwoStrings(window.PARAMS.DATA, payload.slice(1)) >= 0.7){    // Compare
+
+					// Vibrate here
+					console.log("Encoded String:",payload.slice(1));
+				}
+				payload = ""
+			} else {
+				if(payload.indexOf("^") == 0 && payload.slice(-1) != decodedChar){ 
+					payload += decodedChar;
+				}
+			}
 		}
 	}
 	//FIND MAXFREQUENCY -----------------------------------

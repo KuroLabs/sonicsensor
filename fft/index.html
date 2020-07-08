@@ -9,6 +9,7 @@
 </head>
 
 <body>
+	<button id="sendMsg">Send Message</button>
 
 	<p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
 
@@ -28,13 +29,32 @@
 			FREQMIN: 17500,
 			FREQMAX: 18500,
 			FREQERR: 50,
+			DATA: 'ABC'
 		}
 	</script>
 
+	<!-- Script for stringCompare  -->
+	<script src="stringSimilarity.js"></script>
+	
 	<script src="p5.js"></script>
 	<script src="p5.sound.js"></script>
 	<script src="sonicnet/sonic-coder.js"></script>
+	<script src="sonicnet/sonic-socket.js"></script>
 	<script src="analyzer.js"></script>
+	<script>
+		// Generate audio and store as Buffer
+		preRun(window.PARAMS.DATA);
+
+		// Play audio from recorded buffer
+		sendMsg.onclick = function(){
+			if(songBuffer){
+				let song = audioContext.createBufferSource();
+				song.buffer = songBuffer;
+				song.connect(audioContext.destination);
+				song.start();
+			}
+		}
+	</script>
 </body>
 
 </html>

@@ -2,7 +2,7 @@
  * A simple sonic encoder/decoder for [a-z0-9] => frequency (and back).
  * A way of representing characters with frequency.
  */
-var ALPHABET = '\n abcdefghijklmnopqrstuvwxyz0123456789,.!?@*';
+// var ALPHABET = '\n abcdefghijklmnopqrstuvwxyz0123456789,.!?@*';
 
 function SonicCoder(params) {
 	params = params || {};
