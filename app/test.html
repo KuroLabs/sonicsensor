@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>generate</title>
+</head>
+
+<body>
+    <p style="text-align: center;">Generating a sound wave</p>
+    <button id="generate">Generate</button>
+    <button id="play" disabled>Play</button>
+</body>
+<script>
+    var tpo = [15500, 15600, 15700];
+    function send(input, opt_callback) {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Use WAAPI to schedule the frequencies.
+        for (var i = 0; i < input.length; i++) {
+            var freq = tpo[i]
+            var time = audioCtx.currentTime + 0.5 * i;
+            scheduleToneAt(freq, time, 0.5);
+        }
+    };
+
+    function scheduleToneAt(freq, startTime, duration) {
+        // create web audio api context
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        var gainNode = audioCtx.createGain();
+        // Gain => Merger
+        gainNode.gain.value = 1;
+
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(1, startTime + 0.07);
+        gainNode.gain.setValueAtTime(1, startTime + duration - 0.07);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+
+        gainNode.connect(audioCtx.destination);
+
+        // create Oscillator node
+        var oscillator = audioCtx.createOscillator();
+        oscillator.frequency.value = freq
+        oscillator.start();
+        oscillator.connect(gainNode);
+    };
+
+
+    generate.addEventListener("click", () => {
+        send("abc");
+    })
+
+
+</script>
+
+</html>
