@@ -10,6 +10,9 @@ let started = false;
 
 let mail;
 
+function preload() {
+}
+
 function preRun(data) {
     let ssocket = new SonicSocket();
     const audioBuffer = ssocket.send(data);
@@ -25,16 +28,18 @@ function clamp(value, min, max) {
 }
 
 function bootstrap(cb) {
+    getAudioContext().resume();
     mic = new p5.AudioIn()
     mic.start()
-    fft = new p5.FFT(0.2);
+    fft = new p5.FFT();
     fft.setInput(mic);
-    started = true;
     mail = cb;
-    loop();
+    started = true;
+    setTimeout(() => {
+        loop();
+    }, 2000);
     // sound.amp(0.4);
 }
-
 
 function setup() {
     // CANVAS SETUP
@@ -57,10 +62,11 @@ function indexToFreq(index, spectrum) {
 
 function draw() {
     if (started) {
+
         background(0);
+        noStroke();
+        fill(240, 150, 150);
         let spectrum = fft.analyze();
-        noStroke(255);
-        fill(0, 255, 0);
 
         // FIND MAXFREQUENCY -----------------------------------
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length);
@@ -73,6 +79,7 @@ function draw() {
             }
         }
         if (max > window.PARAMS.THRESHOLD) {
+
             let f = indexToFreq(index, spectrum);
 
             if (window.PARAMS.FREQMIN < f && f <= window.PARAMS.FREQMAX) {

@@ -19,7 +19,7 @@ function SonicSocket(params) {
 SonicSocket.prototype.send = function (input, opt_callback) {
 	// Surround the word with start and end characters.
 	input = this.coder.startChar + input + this.coder.endChar;
-	
+
 	// OfflineAudioContext for Buffer.
 	const offlineCtx = new window.OfflineAudioContext({ length: input.length * window.PARAMS.CHAR_DURATION * 48000, sampleRate: 48000 });
 
@@ -28,7 +28,7 @@ SonicSocket.prototype.send = function (input, opt_callback) {
 		var char = input[i];
 		var freq = this.coder.charToFreq(char);
 		var time = audioContext.currentTime + this.charDuration * i;
-		this.scheduleToneAt(freq, time, this.charDuration,offlineCtx);
+		this.scheduleToneAt(freq, time, this.charDuration, offlineCtx);
 	}
 
 	// If specified, callback after roughly the amount of time it would have
@@ -47,8 +47,8 @@ SonicSocket.prototype.scheduleToneAt = function (freq, startTime, duration, offl
 	// Gain => Merger
 	gainNode.gain.value = window.PARAMS.GAINVAL || 100;
 	gainNode.gain.setValueAtTime(0, startTime);
-	gainNode.gain.linearRampToValueAtTime(1, startTime + this.rampDuration);
-	gainNode.gain.setValueAtTime(1, startTime + duration - this.rampDuration);
+	gainNode.gain.linearRampToValueAtTime(0.1, startTime + this.rampDuration);
+	gainNode.gain.setValueAtTime(0.1, startTime + duration - this.rampDuration);
 	gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
 	gainNode.connect(offlineCtx.destination);
