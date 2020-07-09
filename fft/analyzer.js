@@ -67,7 +67,7 @@ function draw() {
         noStroke();
         fill(240, 150, 150);
         let spectrum = fft.analyze();
-
+		let testEnergy = fft.getEnergy(18450,18500);
         // FIND MAXFREQUENCY -----------------------------------
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length);
         var max = -Infinity;
@@ -91,7 +91,7 @@ function draw() {
                     payload = "^";
                 } else if (decodedChar == "$") {
                     if (stringSimilarity.compareTwoStrings(window.PARAMS.DATA, payload.slice(1)) >= 0.7) {    // Compare
-
+						console.log("AVG Energy of $",testEnergy)
                         // Vibrate here
                         console.log("Encoded String:", payload.slice(1));
                         mail(payload.slice(1));
