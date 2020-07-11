@@ -13,6 +13,8 @@
 <body>
     <button id="sendMsg">Send Message</button>
     <button id="start">Start capturing</button>
+    <button id="switchmic">Start and stop mic</button>
+    <button id="switchspeaker">Start and stop speaker</button>
     <p>Dont send message and start capturing at the same time it listens to ur own freq and vibrates - Bug</p>
     <p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
 
@@ -39,6 +41,7 @@
 
     <!-- Script for stringCompare  -->
     <script src="stringSimilarity.js"></script>
+    <script src="stringCheck.js"></script>
 
     <script src="p5.js"></script>
     <script src="p5.sound.js"></script>
@@ -76,9 +79,9 @@
             }, interval);
         }
 
-        // Play audio from recorded buffer
-
+        
         start.onclick = () => {
+            // Start p5.js 
             bootstrap(incomingFeed)
         };
 
@@ -87,12 +90,36 @@
             console.log("MESSAGE" + data)
             startVibrate(1000, 500);
         }
-
-
-
+        
+        switchmic.onclick = () => {
+            if(micSwitch){
+                micSwitch = false;
+                mic.stop();
+            } else{
+                micSwitch = true;
+                mic.start();
+            }
+        }
+        switchspeaker.onclick = () => {
+            if(speakerSwitch){
+                song.stop();
+                speakerSwitch = false;
+            } else{
+                speakerSwitch = true;
+                if (songBuffer) {
+                song = audioContext.createBufferSource();
+                song.buffer = songBuffer;
+                song.loop = true;
+                song.connect(audioContext.destination);
+                song.start();
+            }
+            }
+        }
+        
+        // Play audio from recorded buffer
         sendMsg.onclick = function () {
             if (songBuffer) {
-                let song = audioContext.createBufferSource();
+                song = audioContext.createBufferSource();
                 song.buffer = songBuffer;
                 song.loop = true;
                 song.connect(audioContext.destination);

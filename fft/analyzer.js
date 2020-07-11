@@ -1,4 +1,8 @@
-let mic, fft, coder
+let mic, fft, coder,song
+
+// switch mic on and off
+let micSwitch = false;
+let speakerSwitch = true ;
 
 // Decoded String
 let payload = "";
@@ -30,7 +34,7 @@ function clamp(value, min, max) {
 function bootstrap(cb) {
     getAudioContext().resume();
     mic = new p5.AudioIn()
-    mic.start()
+    // mic.start()
     fft = new p5.FFT();
     fft.setInput(mic);
     mail = cb;
@@ -90,7 +94,7 @@ function draw() {
                     payload = "^";
                 } else if (decodedChar == "$") {
                     console.log(testEnergy, payload.slice(1));
-                    if (stringSimilarity.compareTwoStrings(window.PARAMS.DATA, payload.slice(1)) >= 0.7 && testEnergy <= 160) {    // Compare
+                    if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
                         console.log("AVG Energy of $", testEnergy)
                         // Vibrate here
                         console.log("Encoded String:", payload.slice(1));
@@ -98,8 +102,15 @@ function draw() {
                     }
                     payload = ""
                 } else {
-                    if (payload.indexOf("^") == 0 && payload.slice(-1) != decodedChar) {
+                    if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                         payload += decodedChar;
+                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6){
+                            console.log("AVG Energy of ", testEnergy)
+                            // Vibrate here
+                            console.log("Encoded String:", payload);
+                            mail(payload);
+                            payload = ""
+                        }
                     }
                 }
             }
@@ -115,4 +126,16 @@ function draw() {
         endShape();
     }
 
+}
+
+// Prototype Switching Model 
+const callTimeout = (time1,time2) => {
+    if(!killSwitch){                    // switch for killing this loop
+        funca()
+        setTimeout(funcb(),time1)
+        setTimeout(funtion(){
+            //randomize time1 & time2
+            callTimeout(time1,time2)
+        },time1+time2)
+    }
 }
