@@ -27,6 +27,7 @@ SonicSocket.prototype.send = function (input, opt_callback) {
 	for (var i = 0; i < input.length; i++) {
 		var char = input[i];
 		var freq = this.coder.charToFreq(char);
+		console.log("Freq : " + freq + " for " + char)
 		var time = audioContext.currentTime + this.charDuration * i;
 		this.scheduleToneAt(freq, time, this.charDuration, offlineCtx);
 	}
@@ -47,8 +48,8 @@ SonicSocket.prototype.scheduleToneAt = function (freq, startTime, duration, offl
 	// Gain => Merger
 	gainNode.gain.value = window.PARAMS.GAINVAL || 100;
 	gainNode.gain.setValueAtTime(0, startTime);
-	gainNode.gain.linearRampToValueAtTime(0.1, startTime + this.rampDuration);
-	gainNode.gain.setValueAtTime(0.1, startTime + duration - this.rampDuration);
+	gainNode.gain.linearRampToValueAtTime(0.03, startTime + this.rampDuration); //change gain here
+	gainNode.gain.setValueAtTime(0.03, startTime + duration - this.rampDuration);
 	gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
 	gainNode.connect(offlineCtx.destination);

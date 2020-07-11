@@ -2,114 +2,115 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>app</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app</title>
 </head>
 
 <body>
-	<button id="messageButton">Send Message</button>
-	<button id="vibrate">Vibrate</button>
-	<br>
+  <button id="messageButton">Send Message</button>
+  <button id="vibrate">Vibrate</button>
+  <br>
 
-	<!-- gain slider  -->
-	<strong>GAIN SLIDER: </strong><input type="range" id="gainSlider" min="0" max="1" step="0.01" size="0" style="width: 300px; margin-top: 15px;">
-	<strong id="gainSliderValue">0</strong>
+  <!-- gain slider  -->
+  <strong>GAIN SLIDER: </strong><input type="range" id="gainSlider" min="0" max="1" step="0.01" size="0"
+    style="width: 300px; margin-top: 15px;">
+  <strong id="gainSliderValue">0</strong>
 
-	<br>
-	<p id="debugfreq" style="font-weight: 900;font-size: 3rem; text-align: center;"></p>
+  <br>
+  <p id="debugfreq" style="font-weight: 900;font-size: 3rem; text-align: center;"></p>
 
-	<!-- MOBILE DEBUGGING -->
-	<script src="//cdn.jsdelivr.net/npm/eruda"></script>
-	<script>
-		eruda.init();
-	</script>
+  <!-- MOBILE DEBUGGING -->
+  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+  </script>
 
-	<!-- FROM app/ -->
-	<!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
-	<script src="./scriptBundle.js"></script>
-	<!-- CUSTOM -->
-	<script>
-		// GAINVAL
-		window.PARAMS = {
-			ALPHABET: 'ABC123',
-			CHAR_DURATION: 0.3,
-			RAMP_DURATION: 0.09,
-			THRESHOLD: -65, // -65 - APP | +100 - FFT
-			TIMEOUT: 550,
-			FREQMIN: 17500,
-			FREQMAX: 18500,
-			FREQERR: 50,
-			GAINVAL: 0
-		}
+  <!-- FROM app/ -->
+  <!-- browserify sonicnet/main.js -o scriptBundle.js -s Sonic -->
+  <script src="./scriptBundle.js"></script>
+  <!-- CUSTOM -->
+  <script>
+    // GAINVAL
+    window.PARAMS = {
+      ALPHABET: 'ABC123',
+      CHAR_DURATION: 0.3,
+      RAMP_DURATION: 0.09,
+      THRESHOLD: -65, // -65 - APP | +100 - FFT
+      TIMEOUT: 550,
+      FREQMIN: 18000,
+      FREQMAX: 18500,
+      FREQERR: 50,
+      GAINVAL: 0
+    }
 
-		//SLIDER
-		gainSlider.oninput = function () {
-			window.PARAMS.GAINVAL = gainSlider.value;
-			gainSliderValue.innerHTML = gainSlider.value;
-		}
+    //SLIDER
+    gainSlider.oninput = function () {
+      window.PARAMS.GAINVAL = gainSlider.value;
+      gainSliderValue.innerHTML = gainSlider.value;
+    }
 
-		const {
-			SonicServer,
-			SonicSocket
-		} = Sonic;
+    const {
+      SonicServer,
+      SonicSocket
+    } = Sonic;
 
-		var heartBeat = 0;
-		var vibrateInterval;
+    var heartBeat = 0;
+    var vibrateInterval;
 
-		// Starts vibration at passed in level
-		function startVibrate(duration) {
-			if (+new Date() - heartBeat == 3000) {
-				stopVibrate();
-				return;
-			}
-			navigator.vibrate(duration);
-		}
+    // Starts vibration at passed in level
+    function startVibrate(duration) {
+      if (+new Date() - heartBeat == 3000) {
+        stopVibrate();
+        return;
+      }
+      navigator.vibrate(duration);
+    }
 
-		// Stops vibration
-		function stopVibrate() {
-			// Clear interval and stop persistent vibrating
-			if (vibrateInterval) clearInterval(vibrateInterval);
-			navigator.vibrate(0);
-		}
+    // Stops vibration
+    function stopVibrate() {
+      // Clear interval and stop persistent vibrating
+      if (vibrateInterval) clearInterval(vibrateInterval);
+      navigator.vibrate(0);
+    }
 
-		// Start persistent vibration at given duration and interval
-		// Assumes a number value is given
-		function startPersistentVibrate(duration, interval) {
-			vibrateInterval = setInterval(function () {
-				startVibrate(duration);
-			}, interval);
-		}
+    // Start persistent vibration at given duration and interval
+    // Assumes a number value is given
+    function startPersistentVibrate(duration, interval) {
+      vibrateInterval = setInterval(function () {
+        startVibrate(duration);
+      }, interval);
+    }
 
-		//SENDING SIDE
-		var MESSAGE = 'A12';
-		vibrate.onclick = function () {
-			navigator.vibrate(2000);
-		}
+    //SENDING SIDE
+    var MESSAGE = 'A12';
+    vibrate.onclick = function () {
+      navigator.vibrate(2000);
+    }
 
-		messageButton.onclick = function () {
-			ssocket = new SonicSocket();
-			console.log("SENDING")
-			ssocket.send(MESSAGE);
+    messageButton.onclick = function () {
+      ssocket = new SonicSocket();
+      console.log("SENDING")
+      ssocket.send(MESSAGE);
 
-			// // SEND CONTINUOUSLY
-			// setInterval(() => {
-			//   ssocket.send(MESSAGE);
-			// }, 4000)
-		}
+      // // SEND CONTINUOUSLY
+      // setInterval(() => {
+      //   ssocket.send(MESSAGE);
+      // }, 4000)
+    }
 
-		//RECEIVING SIDE
-		sserver = new SonicServer();
-		sserver.setDebug(true)
+    //RECEIVING SIDE
+    sserver = new SonicServer();
+    sserver.setDebug(true)
 
-		sserver.on('message', function (message) {
-			heartBeat = +new Date();
-			console.log("MESSAGE RECV")
-			startVibrate(1000, 500);
-		});
+    sserver.on('message', function (message) {
+      heartBeat = +new Date();
+      console.log("MESSAGE RECV")
+      startVibrate(1000, 500);
+    });
 
-		sserver.start();
-	</script>
+    sserver.start();
+  </script>
 
 </body>
 
