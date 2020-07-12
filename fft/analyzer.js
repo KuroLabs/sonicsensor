@@ -10,6 +10,8 @@ let payload = "";
 // Sound generated is recorded as Buffer
 var songBuffer = null;
 
+var freqRanges = null;
+
 let started = false;
 
 let mail;
@@ -71,8 +73,15 @@ function draw() {
         noStroke();
         fill(240, 150, 150);
         let spectrum = fft.analyze();
-        let testEnergy = fft.getEnergy(18450, 18500);
         // FIND MAXFREQUENCY -----------------------------------
+        
+        // GET ENERGY ARR
+        let testEnergyArr = freqRanges.map((x) => {
+            return fft.getEnergy(x[0], x[1])
+        });
+        console.log(testEnergyArr);
+        
+        
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length) - 10;
         var max = -Infinity;
         var index = -1;
@@ -93,9 +102,7 @@ function draw() {
                 if (decodedChar == "^") {
                     payload = "^";
                 } else if (decodedChar == "$") {
-                    console.log(testEnergy, payload.slice(1));
                     if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
-                        console.log("AVG Energy of $", testEnergy)
                         // Vibrate here
                         console.log("Encoded String:", payload.slice(1));
                         mail(payload.slice(1));
@@ -105,7 +112,6 @@ function draw() {
                     if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                         payload += decodedChar;
                         if (minOperations(window.PARAMS.DATA, payload) >= 0.6){
-                            console.log("AVG Energy of ", testEnergy)
                             // Vibrate here
                             console.log("Encoded String:", payload);
                             mail(payload);
@@ -128,14 +134,51 @@ function draw() {
 
 }
 
-// Prototype Switching Model 
-const callTimeout = (time1,time2) => {
-    if(!killSwitch){                    // switch for killing this loop
-        funca()
-        setTimeout(funcb(),time1)
-        setTimeout(funtion(){
-            //randomize time1 & time2
-            callTimeout(time1,time2)
-        },time1+time2)
+const getFreqRanges = () => {
+    var RANGE = window.PARAMS.FREQMAX - window.PARAMS.FREQMIN;
+    var INTERVAL = (RANGE / window.PARAMS.ALPHABET.length);
+    var FREQRANGES = [];
+    for (var i = 0; i < window.PARAMS.ALPHABET.length; i++) {
+        tempArr = [];
+        if (i == 0) {
+            tempArr.push(window.PARAMS.FREQMIN - PARAMS.FREQERR);
+            tempArr.push(PARAMS.FREQMIN + (Math.round((INTERVAL * 10) / 2) / 10));
+            FREQRANGES.push(tempArr);
+        } else if (i == 1) {
+            tempArr.push(FREQRANGES[i - 1][1])
+            tempArr.push(tempArr[0] + INTERVAL);
+            FREQRANGES.push(tempArr);
+        } else {
+            tempArr.push(FREQRANGES[i - 1][1]);
+            tempArr.push(tempArr[0] + INTERVAL);
+            FREQRANGES.push(tempArr);
+        }
     }
+    return FREQRANGES;
 }
+freqRanges = getFreqRanges();
+
+// // Prototype Switching Model 
+// const callTimeout = (time1,time2) => {
+//     if(!killSwitch){                    // switch for killing this loop
+//         funca()
+//         setTimeout(funcb(),time1)
+//         setTimeout(funtion(){
+//             //randomize time1 & time2
+//             callTimeout(time1,time2)
+//         },time1+time2)
+//     }
+// }
+
+
+
+
+//REFERENCE
+// ^ - 18050.1 - 18156.2  (106.1)
+// A - 18156.3            (122.4)
+// B - 18268.8
+// C - 18381.3
+// 1 - 18493.8
+// 2 - 18606.3
+// 3 - 18718.8
+// $ - 18831.3

@@ -13,7 +13,8 @@ function SonicCoder(params) {
 	this.startChar = params.startChar || '^';
 	this.endChar = params.endChar || '$';
 	// Make sure that the alphabet has the start and end chars.
-	this.alphabet = this.startChar + this.alphabetString + this.endChar;
+	this.alphabet = this.alphabetString;
+	// this.alphabet = this.startChar + this.alphabetString + this.endChar;
 }
 
 /**
@@ -39,11 +40,11 @@ SonicCoder.prototype.charToFreq = function (char) {
  */
 SonicCoder.prototype.freqToChar = function (freq) {
 	// If the frequency is out of the range.
-	if (!(this.freqMin < freq && freq < this.freqMax)) {
+	if (!(this.freqMin <= freq && freq <= this.freqMax)) {
 		// If it's close enough to the min, clamp it (and same for max).
-		if (this.freqMin - freq < this.freqError) {
+		if ( freq < this.freqMin && (this.freqMin - freq) < this.freqError) {
 			freq = this.freqMin;
-		} else if (freq - this.freqMax < this.freqError) {
+		} else if (freq > this.freqMax && (freq - this.freqMax) < this.freqError) {
 			freq = this.freqMax;
 		} else {
 			// Otherwise, report error.
@@ -51,6 +52,7 @@ SonicCoder.prototype.freqToChar = function (freq) {
 			return null;
 		}
 	}
+
 	// Convert frequency to index to char.
 	var freqRange = this.freqMax - this.freqMin;
 	var percent = (freq - this.freqMin) / freqRange;
