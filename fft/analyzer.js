@@ -2,7 +2,8 @@ let mic, fft, coder,song
 
 // switch mic on and off
 let micSwitch = false;
-let speakerSwitch = true ;
+let speakerSwitch = false;
+let killSwitch = false;
 
 // Decoded String
 let payload = "";
@@ -79,9 +80,8 @@ function draw() {
         let testEnergyArr = freqRanges.map((x) => {
             return fft.getEnergy(x[0], x[1])
         });
-        console.log(testEnergyArr);
         
-        
+
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length) - 10;
         var max = -Infinity;
         var index = -1;
@@ -158,20 +158,55 @@ const getFreqRanges = () => {
 }
 freqRanges = getFreqRanges();
 
-// // Prototype Switching Model 
+
+const switchMic = () => {
+    if (micSwitch) {
+        micSwitch = false;
+        mic.stop();
+    } else {
+        micSwitch = true;
+        mic.start();
+    }
+}
+
+
+const switchSpeaker = () => {
+    if (speakerSwitch) {
+        song.stop();
+        speakerSwitch = false;
+    } else {
+        speakerSwitch = true;
+        if (songBuffer) {
+            song = audioContext.createBufferSource();
+            song.buffer = songBuffer;
+            song.loop = true;
+            song.connect(audioContext.destination);
+            song.start();
+        }
+    }
+}
+
+// Prototype Switching Model 
 // const callTimeout = (time1,time2) => {
-//     if(!killSwitch){                    // switch for killing this loop
-//         funca()
-//         setTimeout(funcb(),time1)
-//         setTimeout(funtion(){
-//             //randomize time1 & time2
-//             callTimeout(time1,time2)
-//         },time1+time2)
+//     if(!killSwitch) {                    // switch for killing this loop
+//         switchSpeaker(); 
+//         setTimeout(function() {
+//             switchSpeaker();
+//             switchMic();
+//         },time1);
+
+//         setTimeout(function(){
+//             switchMic();
+//             let T2 = getRndInteger(250, 350) * 10;
+//             callTimeout(time1,T2);
+//         },time1+time2);
 //     }
 // }
+// callTimeout(500, 1500);
 
-
-
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
 //REFERENCE
 // ^ - 18050.1 - 18156.2  (106.1)
