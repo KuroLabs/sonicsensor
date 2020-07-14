@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>FFT</title>
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel='stylesheet' type='text/css' media='screen' href='style.css'> -->
+</head>
+
+<body>
+    <button id="sendMsg">Send Message</button>
+    <button id="start">Start capturing</button>
+    <button id="switchMicButton">Start and stop mic</button>
+    <button id="switchSpeakerButton">Start and stop speaker</button>
+    <!-- <button id="callTimeoutButton">Call the timeout</button> -->
+    <p>Dont send message and start capturing at the same time it listens to ur own freq and vibrates - Bug</p>
+    <p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
+
+    <!-- MOBILE DEBUGGING -->
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        eruda.init();
+    </script>
+    <script>
+        // GAINVAL
+        window.PARAMS = {
+            ALPHABET: 'ABCDEFGHIJKLMNOPQRST0123456789',
+            CHAR_DURATION: 0.3,
+            RAMP_DURATION: 0.09,
+            THRESHOLD: 0, // -65 - APP | +100 - FFT
+            TIMEOUT: 550,
+            FREQMIN: 17500,
+            FREQMAX: 19000,
+            FREQERR: 50,
+            DATA: '',
+            GAINVAL: 0.1 //wont work check sonic-coder.js
+        }
+    </script>
+
+    <!-- Script for stringCompare  -->
+
+    <script src="p5.js"></script>
+    <script src="p5.sound.js"></script>
+    <script src="sonicnet/sonic-coder.js"></script>
+    <script src="sonicnet/sonic-socket.js"></script>
+    <script src="analyzer.js"></script>
+    <script>
+
+        var heartBeat = 0;
+        var vibrateInterval;
+
+        // Starts vibration at passed in level
+        function startVibrate(duration) {
+            if (+new Date() - heartBeat == 3000) {
+                stopVibrate();
+                return;
+            }
+            navigator.vibrate(duration);
+        }
+
+        // Stops vibration
+        function stopVibrate() {
+            // Clear interval and stop persistent vibrating
+            if (vibrateInterval) clearInterval(vibrateInterval);
+            navigator.vibrate(0);
+        }
+
+        // Start persistent vibration at given duration and interval
+        // Assumes a number value is given
+        function startPersistentVibrate(duration, interval) {
+            vibrateInterval = setInterval(function () {
+                startVibrate(duration);
+            }, interval);
+        }
+
+        
+        start.onclick = () => {
+            // Start p5.js 
+            bootstrap(incomingFeed)
+        };
+
+        function incomingFeed(data) {
+            heartBeat = +new Date();
+            console.log("MESSAGE" + data)
+            startVibrate(1000, 500);
+        }
+        
+
+        switchMicButton.onclick = switchMic; //in analyzer.js
+        switchSpeakerButton.onclick = switchSpeaker; //in analyzer.js
+        // callTimeoutButton.onclick = function () {
+        //     callTimeout(1500, 3500)
+        // };
+        
+        // Play audio from recorded buffer
+        sendMsg.onclick = function () {
+            let ssocket = new SonicSocket();
+            let time = String(+new Date()).slice(10)
+            let result = time.split("").map((e,i) => {
+                return window.PARAMS.ALPHABET[parseInt(e)+ 10*i]
+            })
+            console.log("Sent1 :"+String(+new Date()).slice(9)+"  :   "+result.join(""))
+            const audioBuffer = ssocket.send(result.join(""));
+        }
+    </script>
+</body>
+
+</html>
