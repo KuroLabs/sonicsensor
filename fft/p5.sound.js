@@ -6418,10 +6418,7 @@
         var constraints = {
           audio: {
             sampleRate: master.audiocontext.sampleRate,
-            echoCancellation: { exact: true },
-            googEchoCancellation: { exact: true },
-            googAutoGainControl: { exact: true },
-            googNoiseSuppression: { exact: true }
+            echoCancellation: false
           }
         };
 

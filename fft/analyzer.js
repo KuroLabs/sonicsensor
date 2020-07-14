@@ -1,4 +1,4 @@
-let mic, fft, coder,song
+let mic, fft, coder, song
 
 // switch mic on and off
 let micSwitch = false;
@@ -37,14 +37,11 @@ function clamp(value, min, max) {
 function bootstrap(cb) {
     getAudioContext().resume();
     mic = new p5.AudioIn()
-    // mic.start()
     fft = new p5.FFT();
     fft.setInput(mic);
     mail = cb;
     started = true;
-    setTimeout(() => {
-        loop();
-    }, 2000);
+    loop();
     // sound.amp(0.4);
 }
 
@@ -75,12 +72,12 @@ function draw() {
         fill(240, 150, 150);
         let spectrum = fft.analyze();
         // FIND MAXFREQUENCY -----------------------------------
-        
+
         // GET ENERGY ARR
         let testEnergyArr = freqRanges.map((x) => {
             return fft.getEnergy(x[0], x[1])
         });
-        
+
 
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length) - 10;
         var max = -Infinity;
@@ -98,27 +95,36 @@ function draw() {
             if (window.PARAMS.FREQMIN - f < window.PARAMS.FREQERR && f <= window.PARAMS.FREQMAX) {
                 document.querySelector("#debugfreq").innerHTML = f;
                 var decodedChar = coder.freqToChar(f);
-                // Monitors for payload
-                if (decodedChar == "^") {
-                    payload = "^";
-                } else if (decodedChar == "$") {
-                    if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
-                        // Vibrate here
-                        console.log("Encoded String:", payload.slice(1));
-                        mail(payload.slice(1));
-                    }
-                    payload = ""
-                } else {
-                    if (payload.length == 0 || payload.slice(-1) != decodedChar) {
-                        payload += decodedChar;
-                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6){
+                if (testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] <= 160) {
+                    console.log(decodedChar, testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]);
+                    // Monitors for payload
+                    if (decodedChar == "^") {
+                        payload = "^";
+                    } else if (decodedChar == "$") {
+                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
                             // Vibrate here
-                            console.log("Encoded String:", payload);
-                            mail(payload);
-                            payload = ""
+                            console.log("Encoded String:", payload.slice(1));
+                            mail(payload.slice(1));
+
+
+                        }
+                        payload = ""
+                    } else {
+                        if (payload.length == 0 || payload.slice(-1) != decodedChar) {
+                            payload += decodedChar;
+                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
+                                // Vibrate here
+                                console.log("Encoded String:", payload);
+                                mail(payload);
+                                payload = ""
+                            }
                         }
                     }
+                } else {
+                    // console.error("Its your echo mate Hellooooo")
+
                 }
+
             }
         }
         //FIND MAXFREQUENCY -----------------------------------
@@ -165,7 +171,7 @@ const switchMic = () => {
         mic.stop();
     } else {
         micSwitch = true;
-        mic.start();
+        mic.start()
     }
 }
 

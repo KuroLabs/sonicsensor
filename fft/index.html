@@ -32,10 +32,10 @@
             RAMP_DURATION: 0.09,
             THRESHOLD: 0, // -65 - APP | +100 - FFT
             TIMEOUT: 550,
-            FREQMIN: 18100,
+            FREQMIN: 18000,
             FREQMAX: 19000,
             FREQERR: 50,
-            DATA: 'ABC',
+            DATA: '123',
             GAINVAL: 0.1 //wont work check sonic-coder.js
         }
     </script>
@@ -80,7 +80,7 @@
             }, interval);
         }
 
-        
+
         start.onclick = () => {
             // Start p5.js 
             bootstrap(incomingFeed)
@@ -91,14 +91,14 @@
             console.log("MESSAGE" + data)
             startVibrate(1000, 500);
         }
-        
+
 
         switchMicButton.onclick = switchMic; //in analyzer.js
         switchSpeakerButton.onclick = switchSpeaker; //in analyzer.js
         // callTimeoutButton.onclick = function () {
         //     callTimeout(1500, 3500)
         // };
-        
+
         // Play audio from recorded buffer
         sendMsg.onclick = function () {
             if (songBuffer) {
