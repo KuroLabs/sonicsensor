@@ -95,15 +95,18 @@ function draw() {
             if (window.PARAMS.FREQMIN - f < window.PARAMS.FREQERR && f <= window.PARAMS.FREQMAX) {
                 document.querySelector("#debugfreq").innerHTML = f;
                 var decodedChar = coder.freqToChar(f);
-                if (testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] <= 160) {
+                if (testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] <= 160 && testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] >= 70) {
+                    // if (decodedChar == 'C')
+                    //     console.log("C", testEnergyArr[window.PARAMS.ALPHABET.indexOf("C")]);
                     console.log(decodedChar, testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]);
+
                     // Monitors for payload
                     if (decodedChar == "^") {
                         payload = "^";
                     } else if (decodedChar == "$") {
                         if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
                             // Vibrate here
-                            console.log("Encoded String:", payload.slice(1));
+                            console.warn("Encoded String:", payload.slice(1));
                             mail(payload.slice(1));
 
 
@@ -114,7 +117,7 @@ function draw() {
                             payload += decodedChar;
                             if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
                                 // Vibrate here
-                                console.log("Encoded String:", payload);
+                                console.warn("Encoded String:", payload);
                                 mail(payload);
                                 payload = ""
                             }

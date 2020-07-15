@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p></p>
+    <button>start</button>
+    <!-- MOBILE DEBUGGING -->
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        eruda.init();
+    </script>
+    <script>
+        document.querySelector("button").addEventListener("click", () => {
+            window.navigator.vibrate([50]);
+
+        })
+
+    </script>
+</body>
+
+</html>
