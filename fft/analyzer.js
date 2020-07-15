@@ -15,6 +15,7 @@ var freqRanges = null;
 
 let started = false;
 
+var masterCache = {};
 let mail;
 
 function preload() {
@@ -95,31 +96,42 @@ function draw() {
             if (window.PARAMS.FREQMIN - f < window.PARAMS.FREQERR && f <= window.PARAMS.FREQMAX) {
                 document.querySelector("#debugfreq").innerHTML = f;
                 var decodedChar = coder.freqToChar(f);
-                if (testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] <= 160 && testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)] >= 70) {
-                    // if (decodedChar == 'C')
-                    //     console.log("C", testEnergyArr[window.PARAMS.ALPHABET.indexOf("C")]);
-                    console.log(decodedChar, testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]);
+                var energy = testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]
+
+                if (energy <= 160 && energy >= 70) {
+                    if (decodedChar in masterCache) {
+                        masterCache[decodedChar] = Math.max(energy, masterCache[decodedChar])
+                    } else {
+                        masterCache[decodedChar] = energy;
+                    }
 
                     // Monitors for payload
                     if (decodedChar == "^") {
                         payload = "^";
                     } else if (decodedChar == "$") {
-                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
-                            // Vibrate here
-                            console.warn("Encoded String:", payload.slice(1));
-                            mail(payload.slice(1));
-
-
+                        if (minOperations(window.PARAMS.DATA, payload) >= 0.8) {    // Compare
+                            if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                console.warn("Encoded String:", payload);
+                                console.warn("Master cache", masterCache);
+                                mail(payload);
+                                masterCache = {};
+                                payload = ""
+                            }
                         }
                         payload = ""
                     } else {
                         if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                             payload += decodedChar;
-                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
-                                // Vibrate here
-                                console.warn("Encoded String:", payload);
-                                mail(payload);
-                                payload = ""
+                            if (minOperations(window.PARAMS.DATA, payload) >= 0.8) {
+                                // Vibrate here 
+                                if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                    console.warn("Encoded String:", payload);
+                                    console.warn("Master cache", masterCache);
+                                    mail(payload);
+                                    masterCache = {};
+                                    payload = ""
+                                }
+
                             }
                         }
                     }
