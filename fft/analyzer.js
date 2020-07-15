@@ -109,7 +109,8 @@ function draw() {
                     if (decodedChar == "^") {
                         payload = "^";
                     } else if (decodedChar == "$") {
-                        if (minOperations(window.PARAMS.DATA, payload) >= 0.8) {    // Compare
+                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
+                            console.log("before", masterCache)
                             if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
                                 console.warn("Encoded String:", payload);
                                 console.warn("Master cache", masterCache);
@@ -122,8 +123,9 @@ function draw() {
                     } else {
                         if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                             payload += decodedChar;
-                            if (minOperations(window.PARAMS.DATA, payload) >= 0.8) {
+                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
                                 // Vibrate here 
+                                console.log("before", masterCache)
                                 if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
                                     console.warn("Encoded String:", payload);
                                     console.warn("Master cache", masterCache);
