@@ -15,7 +15,7 @@
     <button id="start">Start capturing</button>
     <button id="switchMicButton">Start and stop mic</button>
     <button id="switchSpeakerButton">Start and stop speaker</button>
-    <!-- <button id="callTimeoutButton">Call the timeout</button> -->
+    <button id="callTimeoutButton">Call the timeout</button>
     <p>Dont send message and start capturing at the same time it listens to ur own freq and vibrates - Bug</p>
     <p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
 
@@ -28,15 +28,14 @@
         // GAINVAL
         window.PARAMS = {
             ALPHABET: '^ABC123$',
-            CHAR_DURATION: 0.3,
-            RAMP_DURATION: 0.09,
+            CHAR_DURATION: 0.2,
+            RAMP_DURATION: 0.06,
             THRESHOLD: 0, // -65 - APP | +100 - FFT
             TIMEOUT: 550,
             FREQMIN: 18000,
             FREQMAX: 19000,
             FREQERR: 50,
-            DATA: 'ABC',
-            GAINVAL: 0.1 //wont work check sonic-coder.js
+            DATA: 'A',
         }
     </script>
 
@@ -95,9 +94,10 @@
 
         switchMicButton.onclick = switchMic; //in analyzer.js
         switchSpeakerButton.onclick = switchSpeaker; //in analyzer.js
-        // callTimeoutButton.onclick = function () {
-        //     callTimeout(1500, 3500)
-        // };
+        callTimeoutButton.onclick = function () {
+            let songDuration = window.PARAMS.CHAR_DURATION * 1000 * (window.PARAMS.DATA.length + 2)
+            callTimeout(songDuration, 1500)
+        };
 
         // Play audio from recorded buffer
         sendMsg.onclick = function () {

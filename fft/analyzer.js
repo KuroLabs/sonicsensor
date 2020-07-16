@@ -18,8 +18,12 @@ let started = false;
 var masterCache = {};
 let mail;
 
-function preload() {
+function delCache() {
+    masterCache = {};
+    console.log("THALA 3: ", masterCache);
 }
+
+function preload() {}
 
 function preRun(data) {
     let ssocket = new SonicSocket();
@@ -94,46 +98,59 @@ function draw() {
             let f = indexToFreq(index, spectrum);
 
             if (window.PARAMS.FREQMIN - f < window.PARAMS.FREQERR && f <= window.PARAMS.FREQMAX) {
+
                 document.querySelector("#debugfreq").innerHTML = f;
                 var decodedChar = coder.freqToChar(f);
                 var energy = testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]
 
                 if (energy <= 160 && energy >= 70) {
+                    console.log("FaLSE 4: ",masterCache);
                     if (decodedChar in masterCache) {
-                        masterCache[decodedChar] = Math.max(energy, masterCache[decodedChar])
+                        masterCache[decodedChar]['energy'] = Math.max(energy, masterCache[decodedChar]['energy'])
+                        masterCache[decodedChar]['count'] += 1
                     } else {
-                        masterCache[decodedChar] = energy;
+                        masterCache[decodedChar] = {}
+                        masterCache[decodedChar]['energy'] = energy
+                        masterCache[decodedChar]['count'] = 1
                     }
 
-                    // Monitors for payload
-                    if (decodedChar == "^") {
-                        payload = "^";
-                    } else if (decodedChar == "$") {
-                        if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {    // Compare
-                            console.log("before", masterCache)
-                            if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
-                                console.warn("Encoded String:", payload);
-                                console.warn("Master cache", masterCache);
-                                mail(payload);
-                                masterCache = {};
-                                payload = ""
-                            }
-                        }
-                        payload = ""
-                    } else {
-                        if (payload.length == 0 || payload.slice(-1) != decodedChar) {
+
+                    // masterCache[decodedChar]['count'] >= 2 && masterCache[decodedChar]['count'] <= 20
+                    if (masterCache[decodedChar]['count'] >= 2) {
+                        // Monitors for payload
+                        if (decodedChar == "^") {
+                            payload = "^";
+                        } else if (decodedChar == "$") {
                             payload += decodedChar;
-                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
-                                // Vibrate here 
+                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) { // Compare
                                 console.log("before", masterCache)
-                                if (Object.values(masterCache).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
-                                    console.warn("Encoded String:", payload);
-                                    console.warn("Master cache", masterCache);
+                                // 
+                                if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                    console.warn("Encoded String: ", payload);
+                                    console.warn("Master cache: ", masterCache);
+                                    delCache();
                                     mail(payload);
-                                    masterCache = {};
+                                    console.log("THALA: ", masterCache);
                                     payload = ""
                                 }
+                            }
+                            payload = ""
+                        } else {
+                            if (payload.length == 0 || payload.slice(-1) != decodedChar) {
+                                payload += decodedChar;
+                                if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
+                                    // Vibrate here 
+                                    console.log("before", masterCache)
+                                    if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                        console.warn("Encoded String2: ", payload);
+                                        console.warn("Master cache2: ", masterCache);
+                                        delCache();
+                                        mail(payload);
+                                        console.log("THALA 2: ", masterCache);
+                                        payload = ""
+                                    }
 
+                                }
                             }
                         }
                     }
@@ -141,7 +158,6 @@ function draw() {
                     // console.error("Its your echo mate Hellooooo")
 
                 }
-
             }
         }
         //FIND MAXFREQUENCY -----------------------------------
@@ -210,21 +226,21 @@ const switchSpeaker = () => {
 }
 
 // Prototype Switching Model 
-// const callTimeout = (time1,time2) => {
-//     if(!killSwitch) {                    // switch for killing this loop
-//         switchSpeaker(); 
-//         setTimeout(function() {
-//             switchSpeaker();
-//             switchMic();
-//         },time1);
+const callTimeout = (time1,time2) => {
+    if(!killSwitch) {                    // switch for killing this loop
+        switchSpeaker(); 
+        setTimeout(function() {
+            switchSpeaker();
+            switchMic();
+        },time1);
 
-//         setTimeout(function(){
-//             switchMic();
-//             let T2 = getRndInteger(250, 350) * 10;
-//             callTimeout(time1,T2);
-//         },time1+time2);
-//     }
-// }
+        setTimeout(function(){
+            switchMic();
+            let T2 = getRndInteger(5, 8) * 200;
+            callTimeout(time1,T2);
+        },time1+time2);
+    }
+}
 // callTimeout(500, 1500);
 
 function getRndInteger(min, max) {
