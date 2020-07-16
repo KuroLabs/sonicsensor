@@ -104,7 +104,6 @@ function draw() {
                 var energy = testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]
 
                 if (energy <= 160 && energy >= 70) {
-                    console.log("FaLSE 4: ",masterCache);
                     if (decodedChar in masterCache) {
                         masterCache[decodedChar]['energy'] = Math.max(energy, masterCache[decodedChar]['energy'])
                         masterCache[decodedChar]['count'] += 1
@@ -122,7 +121,7 @@ function draw() {
                             payload = "^";
                         } else if (decodedChar == "$") {
                             payload += decodedChar;
-                            if (minOperations(window.PARAMS.DATA, payload) >= 0.6) { // Compare
+                            if (minOperations("^"+window.PARAMS.DATA+"$", payload) >= 0.6) { // Compare
                                 console.log("before", masterCache)
                                 // 
                                 if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
@@ -138,7 +137,7 @@ function draw() {
                         } else {
                             if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                                 payload += decodedChar;
-                                if (minOperations(window.PARAMS.DATA, payload) >= 0.6) {
+                                if (minOperations("^"+window.PARAMS.DATA+"$", payload) >= 0.6) {
                                     // Vibrate here 
                                     console.log("before", masterCache)
                                     if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
