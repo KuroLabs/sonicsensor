@@ -4,6 +4,7 @@ let mic, fft, coder, song
 let micSwitch = false;
 let speakerSwitch = false;
 let killSwitch = false;
+let receiveFstop = null;
 
 // Decoded String
 let payload = "";
@@ -129,8 +130,8 @@ function draw() {
                                     console.warn("Master cache: ", masterCache);
                                     delCache();
                                     mail(payload);
-                                    console.log("THALA: ", masterCache);
                                     payload = ""
+                                    forceShedule(480);   //hardcoded
                                 }
                             }
                             payload = ""
@@ -145,8 +146,8 @@ function draw() {
                                         console.warn("Master cache2: ", masterCache);
                                         delCache();
                                         mail(payload);
-                                        console.log("THALA 2: ", masterCache);
                                         payload = ""
+                                        forceShedule(480);  // hardcoded
                                     }
 
                                 }
@@ -232,7 +233,7 @@ const callTimeout = (time1, time2) => {
             switchMic();
         }, time1);
 
-        setTimeout(function () {
+        receiveFstop = setTimeout(function () {
             switchMic();
             let T2 = getRndInteger(3, 6) * 200;
             callTimeout(time1, T2);
@@ -240,6 +241,17 @@ const callTimeout = (time1, time2) => {
     }
 }
 // callTimeout(500, 1500);
+
+const forceShedule = (time1) => {
+    if(receiveFstop){
+        clearTimeout(receiveFstop);
+        switchMic();
+    }
+    if(!killSwitch){
+        let T2 = getRndInteger(3, 6) * 200;
+        callTimeout(time1, T2);
+    }
+}
 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;

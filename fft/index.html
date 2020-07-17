@@ -95,7 +95,7 @@
         switchMicButton.onclick = switchMic; //in analyzer.js
         switchSpeakerButton.onclick = switchSpeaker; //in analyzer.js
         callTimeoutButton.onclick = function () {
-            let songDuration = (window.PARAMS.CHAR_DURATION + 0.020) * 1000 * (window.PARAMS.DATA.length + 2)
+            let songDuration = (window.PARAMS.CHAR_DURATION) * 1000 * (window.PARAMS.DATA.length + 2) + 30
             callTimeout(songDuration, 900)
         };
 
