@@ -28,11 +28,11 @@
         // GAINVAL
         window.PARAMS = {
             ALPHABET: '^ABC123$',
-            CHAR_DURATION: 0.2,
+            CHAR_DURATION: 0.15,
             RAMP_DURATION: 0.06,
             THRESHOLD: 0, // -65 - APP | +100 - FFT
             TIMEOUT: 550,
-            FREQMIN: 18000,
+            FREQMIN: 18500,
             FREQMAX: 19000,
             FREQERR: 50,
             DATA: 'B',
@@ -95,8 +95,8 @@
         switchMicButton.onclick = switchMic; //in analyzer.js
         switchSpeakerButton.onclick = switchSpeaker; //in analyzer.js
         callTimeoutButton.onclick = function () {
-            let songDuration = window.PARAMS.CHAR_DURATION * 1000 * (window.PARAMS.DATA.length + 2)
-            callTimeout(songDuration, 1500)
+            let songDuration = (window.PARAMS.CHAR_DURATION + 0.020) * 1000 * (window.PARAMS.DATA.length + 2)
+            callTimeout(songDuration, 900)
         };
 
         // Play audio from recorded buffer
@@ -104,7 +104,6 @@
             if (songBuffer) {
                 song = audioContext.createBufferSource();
                 song.buffer = songBuffer;
-                song.loop = true;
                 song.connect(audioContext.destination);
                 song.start();
             }

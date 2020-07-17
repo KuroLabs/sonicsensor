@@ -23,7 +23,7 @@ function delCache() {
     console.log("THALA 3: ", masterCache);
 }
 
-function preload() {}
+function preload() { }
 
 function preRun(data) {
     let ssocket = new SonicSocket();
@@ -121,10 +121,10 @@ function draw() {
                             payload = "^";
                         } else if (decodedChar == "$") {
                             payload += decodedChar;
-                            if (minOperations("^"+window.PARAMS.DATA+"$", payload) >= 0.6) { // Compare
+                            if (minOperations("^" + window.PARAMS.DATA + "$", payload) >= 0.6) { // Compare
                                 console.log("before", masterCache)
                                 // 
-                                if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 100).length >= Math.ceil(payload.length / 2)) {
                                     console.warn("Encoded String: ", payload);
                                     console.warn("Master cache: ", masterCache);
                                     delCache();
@@ -137,10 +137,10 @@ function draw() {
                         } else {
                             if (payload.length == 0 || payload.slice(-1) != decodedChar) {
                                 payload += decodedChar;
-                                if (minOperations("^"+window.PARAMS.DATA+"$", payload) >= 0.6) {
+                                if (minOperations("^" + window.PARAMS.DATA + "$", payload) >= 0.6) {
                                     // Vibrate here 
                                     console.log("before", masterCache)
-                                    if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 95).length >= Math.ceil(payload.length / 2)) {
+                                    if (Object.keys(masterCache).map(char => masterCache[char]['energy']).filter(x => x > 100).length >= Math.ceil(payload.length / 2)) {
                                         console.warn("Encoded String2: ", payload);
                                         console.warn("Master cache2: ", masterCache);
                                         delCache();
@@ -217,7 +217,6 @@ const switchSpeaker = () => {
         if (songBuffer) {
             song = audioContext.createBufferSource();
             song.buffer = songBuffer;
-            song.loop = true;
             song.connect(audioContext.destination);
             song.start();
         }
@@ -225,19 +224,19 @@ const switchSpeaker = () => {
 }
 
 // Prototype Switching Model 
-const callTimeout = (time1,time2) => {
-    if(!killSwitch) {                    // switch for killing this loop
-        switchSpeaker(); 
-        setTimeout(function() {
+const callTimeout = (time1, time2) => {
+    if (!killSwitch) {                    // switch for killing this loop
+        switchSpeaker();
+        setTimeout(function () {
             switchSpeaker();
             switchMic();
-        },time1);
+        }, time1);
 
-        setTimeout(function(){
+        setTimeout(function () {
             switchMic();
-            let T2 = getRndInteger(5, 8) * 200;
-            callTimeout(time1,T2);
-        },time1+time2);
+            let T2 = getRndInteger(3, 6) * 200;
+            callTimeout(time1, T2);
+        }, time1 + time2);
     }
 }
 // callTimeout(500, 1500);
