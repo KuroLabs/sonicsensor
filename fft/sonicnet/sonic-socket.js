@@ -9,26 +9,23 @@ var audioContext = new window.AudioContext;
  */
 function SonicSocket(params) {
 	params = params || {};
-	this.coder = params.coder || new SonicCoder();
-	this.charDuration = params.charDuration || window.PARAMS.CHAR_DURATION || 0.2;
+	this.charDuration = params.charDuration || 0.2;
 	this.coder = params.coder || new SonicCoder(params);
-	this.rampDuration = params.rampDuration || window.PARAMS.RAMP_DURATION || 0.07;
+	this.rampDuration = params.rampDuration || 0.07;
 }
 
 
-SonicSocket.prototype.send = function (input, opt_callback) {
+SonicSocket.prototype.send = function(input, opt_callback) {
 	// Surround the word with start and end characters.
 	input = this.coder.startChar + input + this.coder.endChar;
 
 	// OfflineAudioContext for Buffer.
-	const offlineCtx = new window.OfflineAudioContext({ length: input.length * window.PARAMS.CHAR_DURATION * 48000, sampleRate: 48000 });
+	const offlineCtx = new window.OfflineAudioContext({ length: input.length * this.charDuration * 48000, sampleRate: 48000 });
 
 	// Use WAAPI to schedule the frequencies.
-	for (var i = 0; i < input.length; i++) {
-		var char = input[i];
-		var freq = this.coder.charToFreq(char);
-		console.log("Freq : " + freq + " for " + char)
-		var time = audioContext.currentTime + this.charDuration * i;
+	for (let i = 0; i < input.length; i++) {
+		let freq = this.coder.charToFreq(input[i]);
+		let time = audioContext.currentTime + this.charDuration * i;
 		this.scheduleToneAt(freq, time, this.charDuration, offlineCtx);
 	}
 
@@ -43,8 +40,8 @@ SonicSocket.prototype.send = function (input, opt_callback) {
 	return offlineCtx
 };
 
-SonicSocket.prototype.scheduleToneAt = function (freq, startTime, duration, offlineCtx) {
-	var gainNode = offlineCtx.createGain();
+SonicSocket.prototype.scheduleToneAt = function(freq, startTime, duration, offlineCtx) {
+	let gainNode = offlineCtx.createGain();
 	// Gain => Merger
 	// gainNode.gain.value = window.PARAMS.GAINVAL || 100;
 	gainNode.gain.setValueAtTime(0, startTime);
@@ -54,7 +51,7 @@ SonicSocket.prototype.scheduleToneAt = function (freq, startTime, duration, offl
 
 	gainNode.connect(offlineCtx.destination);
 
-	var osc = offlineCtx.createOscillator();
+	let osc = offlineCtx.createOscillator();
 	osc.frequency.value = freq;
 	osc.connect(gainNode);
 

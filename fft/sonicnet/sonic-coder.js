@@ -2,43 +2,41 @@
  * A simple sonic encoder/decoder for [a-z0-9] => frequency (and back).
  * A way of representing characters with frequency.
  */
-// var ALPHABET = '\n abcdefghijklmnopqrstuvwxyz0123456789,.!?@*';
+var ALPHABET = '^ABC123$';
 
 function SonicCoder(params) {
 	params = params || {};
-	this.freqMin = params.freqMin || window.PARAMS.FREQMIN || 18500;
-	this.freqMax = params.freqMax || window.PARAMS.FREQMAX || 19500;
-	this.freqError = params.freqError || window.PARAMS.FREQERR || 50;
-	this.alphabetString = params.alphabet || window.PARAMS.ALPHABET || ALPHABET;
+	this.freqMin = params.freqMin || 18500;
+	this.freqMax = params.freqMax || 19500;
+	this.freqError = params.freqError || 50;
+	this.alphabet = params.alphabet || ALPHABET;
 	this.startChar = params.startChar || '^';
 	this.endChar = params.endChar || '$';
+	this.freqRange = this.freqMax - this.freqMin
 	// Make sure that the alphabet has the start and end chars.
-	this.alphabet = this.alphabetString;
-	// this.alphabet = this.startChar + this.alphabetString + this.endChar;
 }
 
 /**
  * Given a character, convert to the corresponding frequency.
  */
-SonicCoder.prototype.charToFreq = function (char) {
+SonicCoder.prototype.charToFreq = function(char) {
 	// Get the index of the character.
-	var index = this.alphabet.indexOf(char);
+	let index = this.alphabet.indexOf(char);
 	if (index == -1) {
 		// If this character isn't in the alphabet, error out.
 		console.error(char, 'is an invalid character.');
 		index = this.alphabet.length - 1;
 	}
 	// Convert from index to frequency.
-	var freqRange = this.freqMax - this.freqMin;
-	var percent = index / this.alphabet.length;
-	var freqOffset = Math.round(freqRange * percent);
+	let percent = index / this.alphabet.length;
+	let freqOffset = Math.round(this.freqRange * percent);
 	return this.freqMin + freqOffset;
 };
 
 /**
  * Given a frequency, convert to the corresponding character.
  */
-SonicCoder.prototype.freqToChar = function (freq) {
+SonicCoder.prototype.freqToChar = function(freq) {
 	// If the frequency is out of the range.
 	if (!(this.freqMin <= freq && freq <= this.freqMax)) {
 		// If it's close enough to the min, clamp it (and same for max).
@@ -54,8 +52,7 @@ SonicCoder.prototype.freqToChar = function (freq) {
 	}
 
 	// Convert frequency to index to char.
-	var freqRange = this.freqMax - this.freqMin;
-	var percent = (freq - this.freqMin) / freqRange;
-	var index = Math.round(this.alphabet.length * percent);
+	let percent = (freq - this.freqMin) / this.freqRange;
+	let index = Math.round(this.alphabet.length * percent);
 	return this.alphabet[index];
 };
