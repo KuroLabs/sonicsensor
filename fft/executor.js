@@ -22,9 +22,9 @@ class Analyzer {
 
     }
 
-    init(callback) {
-        this.notify = callback;
-        
+    init(notify,switchF) {
+        this.notify = notify;
+        this.switchF = switchF;
         // encoding setup - record and store buffer
         const ssocket = new SonicSocket(this.config);
         const audioBuffer = ssocket.send(this.config.data);
@@ -53,7 +53,7 @@ class Analyzer {
 
     setup() {
         // CANVAS SETUP
-        let cnv = createCanvas(1200, 600);
+        // let cnv = createCanvas(1200, 600);
         //DECODER SETUP
         this.coder = new SonicCoder(this.config);
         noLoop();
@@ -74,17 +74,17 @@ class Analyzer {
 
         if (this.started) {
             //SETUP FFT GRAPH
-            background(0);
-            noStroke();
-            fill(240, 150, 150);
+            // background(0);
+            // noStroke();
+            // fill(240, 150, 150);
             let spectrum = this.fft.analyze(); //CRITICAL
             //DRAW PEAKS
-            for (let i = 0; i < spectrum.length; i++) {
-                let x = map(i, 0, spectrum.length, 0, width);
-                let h = -height + map(spectrum[i], 0, 255, height, 0);
-                rect(x, height, width / spectrum.length, h)
-            }
-            endShape();
+            // for (let i = 0; i < spectrum.length; i++) {
+            //     let x = map(i, 0, spectrum.length, 0, width);
+            //     let h = -height + map(spectrum[i], 0, 255, height, 0);
+            //     rect(x, height, width / spectrum.length, h)
+            // }
+            // endShape();
 
 
             // DECODE---------------
@@ -127,14 +127,14 @@ class Analyzer {
                                 this.payload += decodedChar;
                                 if (minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
-                                    if (Object.keys(this.masterCache).map(char => this.masterCache[char]['energy'])
-                                        .filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)) {
+                                    let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
+                                    let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
+                                    this.notify(this.payload,Math.max(...reqEnergy),success);
+                                    if (success) {
 
                                         console.warn("[DEBUG] payload: ", this.payload);
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
-
                                         this.masterCache = {};
-                                        this.notify(this.payload);
                                         this.payload = ""
                                         // this.forceShedule(480); //hardcoded
                                     }
@@ -144,16 +144,15 @@ class Analyzer {
                                 if (this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
                                     this.payload += decodedChar;
                                     if (minOperations("^" + data + "$", this.payload) >= 0.6) {
-                                        // VIBRATE HERE
                                         console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
-                                        if (Object.keys(this.masterCache).map(char => this.masterCache[char]['energy'])
-                                            .filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)) {
+                                        let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
+                                        let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
+                                        this.notify(this.payload,Math.max(...reqEnergy),success);
+                                        if (success) {
 
                                             console.warn("[DEBUG] payload-1: ", this.payload);
                                             console.warn("[DEBUG] masterCache-1: ", this.masterCache);
-
                                             this.masterCache = {};
-                                            this.notify(this.payload);
                                             this.payload = ""
                                             // this.forceShedule(480); // hardcoded
                                         }
@@ -221,9 +220,11 @@ class Analyzer {
     callTimeout(time1, time2) {
         if (!this.killSwitch) { // switch for killing this loop
             this.switchSpeaker();
+            this.switchF("Send");
             setTimeout(() => {
                 this.switchSpeaker();
                 this.switchMic();
+                this.switchF("Receive");
             }, time1);
 
             this.receiveFstop = setTimeout(() => {

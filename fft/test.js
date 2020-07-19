@@ -15,16 +15,20 @@ function cb(params) {
     console.log("RECORDED", params);
 }
 
+function switchF(state) {
+    console.log("State :"+state)
+}
+
 function setup() {
     analyzer.setup();
 }
 
-function draw() {
-    analyzer.draw();
-}
+// function draw() {
+//     analyzer.draw();
+// }
 
 activateButton.onclick = function () {
-    analyzer.init(cb);
+    analyzer.init(cb,switchF);
 }
 
 startButton.onclick = function () {
