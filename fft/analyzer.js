@@ -84,17 +84,22 @@ function draw() {
             return fft.getEnergy(x[0], x[1])
         });
 
-
         let startIndex = frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length) - 10;
-        var max = -Infinity;
-        var index = -1;
-        for (var i = startIndex; i < spectrum.length; i++) {
-            if (spectrum[i] > max) {
-                max = spectrum[i];
-                index = i;
-            }
-        }
-        if (max > window.PARAMS.THRESHOLD) {
+        let maxx = max(spectrum.slice(startIndex))
+        let index = spectrum.indexOf(maxx)
+        console.log(maxx);
+        console.log(index);
+
+        // var maxx = -Infinity;
+        // var index = -1;
+        // for (var i = startIndex; i < spectrum.length; i++) {
+        //     if (spectrum[i] > maxx) {
+        //         maxx = spectrum[i];
+        //         index = i;
+        //     }
+        // }
+
+        if (maxx > window.PARAMS.THRESHOLD) {
 
             let f = indexToFreq(index, spectrum);
 
