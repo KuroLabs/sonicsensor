@@ -18,9 +18,9 @@ function SonicSocket(params) {
 SonicSocket.prototype.send = function(input, opt_callback) {
 	// Surround the word with start and end characters.
 	input = this.coder.startChar + input + this.coder.endChar;
-
+	// console.log(input+" "+this.charDuration+" "+this.rampDuration)
 	// OfflineAudioContext for Buffer.
-	const offlineCtx = new window.OfflineAudioContext({ length: input.length * this.charDuration * 48000, sampleRate: 48000 });
+	const offlineCtx = new window.OfflineAudioContext(1 ,input.length * this.charDuration * 48000 ,48000 );
 
 	// Use WAAPI to schedule the frequencies.
 	for (let i = 0; i < input.length; i++) {

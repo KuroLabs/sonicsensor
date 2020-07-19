@@ -9,11 +9,11 @@ function SonicCoder(params) {
 	this.freqMin = params.freqMin || 18500;
 	this.freqMax = params.freqMax || 19500;
 	this.freqError = params.freqError || 50;
-	this.alphabet = params.alphabet || ALPHABET;
-	this.startChar = params.startChar || '^';
-	this.endChar = params.endChar || '$';
+	this.alphabet = params.alphabet || ALPHABET; //MUST INCLUDE startChar AND endChar
+	this.startChar = this.alphabet[0];
+	this.endChar = this.alphabet[this.alphabet.length-1];
 	this.freqRange = this.freqMax - this.freqMin
-	// Make sure that the alphabet has the start and end chars.
+	
 }
 
 /**

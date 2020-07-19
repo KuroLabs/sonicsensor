@@ -1,11 +1,7 @@
 class Analyzer {
     constructor(config) {
-        getAudioContext().resume();
-        this.config = config
+        this.config = config;
         this.notify = null; //??
-
-        //sonic-coder
-        this.coder = null;
 
         // switch mic on and off
         this.micSwitch = false;
@@ -24,23 +20,31 @@ class Analyzer {
 
         this.masterCache = {};
 
-        let mail;
     }
 
-    init(payload, callback) {
+    init(callback) {
         this.notify = callback;
+        
         // encoding setup - record and store buffer
         const ssocket = new SonicSocket(this.config);
-        const audioBuffer = ssocket.send(payload);
-        audioBuffer.startRendering().then((renderedBuffer) => {
-            this.songBuffer = renderedBuffer;
-        }).catch(err => console.log("[ERR] Render Failed" + err))
-
+        const audioBuffer = ssocket.send(this.config.data);
+        audioBuffer.startRendering();
+        audioBuffer.oncomplete = (e) => {
+            this.songBuffer = e.renderedBuffer;
+            console.log(this.songBuffer)
+        }
+        
+        // audioBuffer.startRendering().then((renderedBuffer) => {
+        //     this.songBuffer = renderedBuffer;
+        //     console.log(this.songBuffer)
+        // }).catch((err) => console.log("[ERR] Render Failed" + err))
+        
         // decode setup
-        this.freqRanges = this.getFreqRanges()
-
+        this.freqRanges = this.getFreqRanges();
+        getAudioContext().resume();
         // p5 setup
-        this.mic = new p5.AudioIn()
+        this.mic = new p5.AudioIn();
+        // this.mic.start()
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
@@ -51,19 +55,31 @@ class Analyzer {
         // CANVAS SETUP
         let cnv = createCanvas(1200, 600);
         //DECODER SETUP
-        this.coder = new SonicCoder(window.PARAMS);
+        this.coder = new SonicCoder(this.config);
         noLoop();
     }
 
+    start() {
+        this.killSwitch = false
+        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 30
+        console.log(songDuration)
+        this.callTimeout(songDuration,900);
+        // this.switchMic()
+        // this.switchSpeaker()
+    }
+
     draw() {
+
+        const {freqMin, freqMax, freqError, threshold, alphabet, data} = this.config;
+
         if (this.started) {
             //SETUP FFT GRAPH
             background(0);
             noStroke();
             fill(240, 150, 150);
-            let spectrum = this.fft.analyze();
+            let spectrum = this.fft.analyze(); //CRITICAL
             //DRAW PEAKS
-            for (var i = 0; i < spectrum.length; i++) {
+            for (let i = 0; i < spectrum.length; i++) {
                 let x = map(i, 0, spectrum.length, 0, width);
                 let h = -height + map(spectrum[i], 0, 255, height, 0);
                 rect(x, height, width / spectrum.length, h)
@@ -73,25 +89,25 @@ class Analyzer {
 
             // DECODE---------------
             let testEnergyArr = this.freqRanges.map((x) => {
-                return fft.getEnergy(x[0], x[1])
+                return this.fft.getEnergy(x[0], x[1])
             });
 
             //FIND MAX FREQ AND ITS INDEX
-            let startIndex = this.frequencyToIndex(window.PARAMS.FREQMIN, spectrum.length) - 10;
+            let startIndex = this.frequencyToIndex(freqMin, spectrum.length) - 10;
             let maxx = max(spectrum.slice(startIndex))
             let index = spectrum.indexOf(maxx)
 
             //DECODE CHAR PROCESS
-            if (maxx > window.PARAMS.THRESHOLD) {
+            if (maxx > threshold) {
                 let f = this.indexToFreq(index, spectrum);
-                if (window.PARAMS.FREQMIN - f < window.PARAMS.FREQERR && f <= window.PARAMS.FREQMAX) {
+                if (freqMin - f < freqError && f <= freqMax) {
 
                     //DEBUG ************
                     document.querySelector("#debugfreq").innerHTML = f;
                     //DEBUG ************
 
-                    var decodedChar = this.coder.freqToChar(f);
-                    var energy = testEnergyArr[window.PARAMS.ALPHABET.indexOf(decodedChar)]
+                    let decodedChar = this.coder.freqToChar(f);
+                    let energy = testEnergyArr[alphabet.indexOf(decodedChar)]
 
                     if (energy <= 160 && energy >= 70) {
                         if (decodedChar in this.masterCache) {
@@ -109,7 +125,7 @@ class Analyzer {
                                 this.payload = "^";
                             } else if (decodedChar == "$") {
                                 this.payload += decodedChar;
-                                if (minOperations("^" + window.PARAMS.DATA + "$", this.payload) >= 0.6) { // Compare
+                                if (minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                     if (Object.keys(this.masterCache).map(char => this.masterCache[char]['energy'])
                                         .filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)) {
@@ -118,16 +134,16 @@ class Analyzer {
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
 
                                         this.masterCache = {};
-                                        mail(this.payload); ////////////MAIL
+                                        this.notify(this.payload);
                                         this.payload = ""
-                                        this.forceShedule(480); //hardcoded
+                                        // this.forceShedule(480); //hardcoded
                                     }
                                 }
                                 this.payload = ""
                             } else {
                                 if (this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
                                     this.payload += decodedChar;
-                                    if (minOperations("^" + window.PARAMS.DATA + "$", this.payload) >= 0.6) {
+                                    if (minOperations("^" + data + "$", this.payload) >= 0.6) {
                                         // VIBRATE HERE
                                         console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                         if (Object.keys(this.masterCache).map(char => this.masterCache[char]['energy'])
@@ -137,9 +153,9 @@ class Analyzer {
                                             console.warn("[DEBUG] masterCache-1: ", this.masterCache);
 
                                             this.masterCache = {};
-                                            mail(this.payload); ////////////MAIL
+                                            this.notify(this.payload);
                                             this.payload = ""
-                                            this.forceShedule(480); // hardcoded
+                                            // this.forceShedule(480); // hardcoded
                                         }
                                     }
                                 }
@@ -152,6 +168,10 @@ class Analyzer {
         }
     }
 
+    stop() {
+        this.killSwitch = true
+    }
+
     clamp(value, min, max) {
         return min < max ?
             (value < min ? min : value > max ? max : value) :
@@ -159,9 +179,9 @@ class Analyzer {
     }
 
     frequencyToIndex(frequency, frequencyBinCount) {
-        let nyquist = sampleRate() / 2
-        let index = Math.round(frequency / nyquist * frequencyBinCount)
-        return this.clamp(index, 0, frequencyBinCount)
+        let nyquist = sampleRate() / 2;
+        let index = Math.round(frequency / nyquist * frequencyBinCount);
+        return this.clamp(index, 0, frequencyBinCount);
     }
 
     indexToFreq(index, spectrum) {
@@ -174,15 +194,15 @@ class Analyzer {
             freqMin,
             freqMax,
             alphabet,
-            freqErr
+            freqError
         } = this.config
         const RANGE = freqMax - freqMin;
         const INTERVAL = (RANGE / alphabet.length);
         const FREQRANGES = [];
         for (let i = 0; i < alphabet.length; i++) {
-            tempArr = [];
+            let tempArr = [];
             if (i == 0) {
-                tempArr.push(freqMin - freqErr);
+                tempArr.push(freqMin - freqError);
                 tempArr.push(freqMin + (Math.round((INTERVAL * 10) / 2) / 10));
                 FREQRANGES.push(tempArr);
             } else if (i == 1) {
@@ -196,6 +216,21 @@ class Analyzer {
             }
         }
         return FREQRANGES;
+    }
+
+    callTimeout(time1, time2) {
+        if (!this.killSwitch) { // switch for killing this loop
+            this.switchSpeaker();
+            setTimeout(() => {
+                this.switchSpeaker();
+                this.switchMic();
+            }, time1);
+
+            this.receiveFstop = setTimeout(() => {
+                this.switchMic();
+                this.callTimeout(time1, this.getRndInteger(3, 6) * 200);
+            }, time1 + time2);
+        }
     }
 
     switchMic() {
@@ -217,28 +252,10 @@ class Analyzer {
             if (this.songBuffer) {
                 this.song = audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
+                this.song.loop = false
                 this.song.connect(audioContext.destination);
                 this.song.start();
             }
-        }
-    }
-
-    setKillSwitch(flag) {
-        this.killSwitch = flag
-    }
-
-    callTimeout(time1, time2) {
-        if (!this.killSwitch) { // switch for killing this loop
-            this.switchSpeaker();
-            setTimeout(function () {
-                this.switchSpeaker();
-                this.switchMic();
-            }, time1);
-
-            this.receiveFstop = setTimeout(function () {
-                this.switchMic();
-                this.callTimeout(time1, this.getRndInteger(3, 6) * 200);
-            }, time1 + time2);
         }
     }
 
