@@ -11,8 +11,8 @@ let config = {
 
 let analyzer = new Analyzer(config);
 
-function cb(params) {
-    console.log("RECORDED", params);
+function cb(params,energy,success) {
+    console.log("RECORDED", params,energy,success);
 }
 
 function switchF(state) {
@@ -23,9 +23,9 @@ function setup() {
     analyzer.setup();
 }
 
-// function draw() {
-//     analyzer.draw();
-// }
+function draw() {
+    analyzer.draw();
+}
 
 activateButton.onclick = function () {
     analyzer.init(cb,switchF);

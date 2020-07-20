@@ -1,4 +1,3 @@
-var audioContext = new window.AudioContext;
 /**
  * Encodes text as audio streams.
  *
@@ -25,7 +24,7 @@ SonicSocket.prototype.send = function(input, opt_callback) {
 	// Use WAAPI to schedule the frequencies.
 	for (let i = 0; i < input.length; i++) {
 		let freq = this.coder.charToFreq(input[i]);
-		let time = audioContext.currentTime + this.charDuration * i;
+		let time = offlineCtx.currentTime + this.charDuration * i;
 		this.scheduleToneAt(freq, time, this.charDuration, offlineCtx);
 	}
 
@@ -46,7 +45,7 @@ SonicSocket.prototype.scheduleToneAt = function(freq, startTime, duration, offli
 	// gainNode.gain.value = window.PARAMS.GAINVAL || 100;
 	gainNode.gain.setValueAtTime(0, startTime);
 	gainNode.gain.linearRampToValueAtTime(1, startTime + this.rampDuration); //change gain here
-	gainNode.gain.setValueAtTime(1, startTime + duration - this.rampDuration);
+	gainNode.gain.setValueAtTime(gainNode.gain.value, startTime + duration - this.rampDuration);
 	gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
 	gainNode.connect(offlineCtx.destination);
@@ -56,5 +55,5 @@ SonicSocket.prototype.scheduleToneAt = function(freq, startTime, duration, offli
 	osc.connect(gainNode);
 
 	osc.start(startTime);
-	osc.stop(startTime + duration)
+	osc.stop(startTime + duration +10)
 };

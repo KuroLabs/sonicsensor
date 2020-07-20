@@ -26,25 +26,20 @@ class Analyzer {
         this.notify = notify;
         this.switchF = switchF;
         // encoding setup - record and store buffer
-        const ssocket = new SonicSocket(this.config);
-        const audioBuffer = ssocket.send(this.config.data);
+        this.sonic = new Sonic(this.config);
+        const audioBuffer = this.sonic.send();
         audioBuffer.startRendering();
         audioBuffer.oncomplete = (e) => {
             this.songBuffer = e.renderedBuffer;
             console.log(this.songBuffer)
         }
-        
-        // audioBuffer.startRendering().then((renderedBuffer) => {
-        //     this.songBuffer = renderedBuffer;
-        //     console.log(this.songBuffer)
-        // }).catch((err) => console.log("[ERR] Render Failed" + err))
-        
         // decode setup
         this.freqRanges = this.getFreqRanges();
+
         getAudioContext().resume();
+        this.audioContext = new window.AudioContext;
         // p5 setup
         this.mic = new p5.AudioIn();
-        // this.mic.start()
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
@@ -55,7 +50,7 @@ class Analyzer {
         // CANVAS SETUP
         // let cnv = createCanvas(1200, 600);
         //DECODER SETUP
-        this.coder = new SonicCoder(this.config);
+        // this.coder = new SonicCoder(this.config);
         noLoop();
     }
 
@@ -93,20 +88,20 @@ class Analyzer {
             });
 
             //FIND MAX FREQ AND ITS INDEX
-            let startIndex = this.frequencyToIndex(freqMin, spectrum.length) - 10;
+            let startIndex = Util.frequencyToIndex(freqMin, spectrum.length) - 10;
             let maxx = max(spectrum.slice(startIndex))
             let index = spectrum.indexOf(maxx)
 
             //DECODE CHAR PROCESS
             if (maxx > threshold) {
-                let f = this.indexToFreq(index, spectrum);
+                let f = Util.indexToFreq(index, spectrum);
                 if (freqMin - f < freqError && f <= freqMax) {
 
                     //DEBUG ************
                     document.querySelector("#debugfreq").innerHTML = f;
                     //DEBUG ************
 
-                    let decodedChar = this.coder.freqToChar(f);
+                    let decodedChar = this.sonic.freqToChar(f);
                     let energy = testEnergyArr[alphabet.indexOf(decodedChar)]
 
                     if (energy <= 160 && energy >= 70) {
@@ -123,9 +118,9 @@ class Analyzer {
                             // Monitors for payload
                             if (decodedChar == "^") {
                                 this.payload = "^";
-                            } else if (decodedChar == "$") {
+                            } else if (decodedChar == "$" || this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
                                 this.payload += decodedChar;
-                                if (minOperations("^" + data + "$", this.payload) >= 0.6) {
+                                if (Util.minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
                                     let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
@@ -136,29 +131,14 @@ class Analyzer {
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
                                         this.payload = ""
-                                        // this.forceShedule(480); //hardcoded
+                                        this.forceShedule(480); //hardcoded
                                     }
-                                }
-                                this.payload = ""
-                            } else {
-                                if (this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
-                                    this.payload += decodedChar;
-                                    if (minOperations("^" + data + "$", this.payload) >= 0.6) {
-                                        console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
-                                        let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
-                                        let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
-                                        this.notify(this.payload,Math.max(...reqEnergy),success);
-                                        if (success) {
-
-                                            console.warn("[DEBUG] payload-1: ", this.payload);
-                                            console.warn("[DEBUG] masterCache-1: ", this.masterCache);
-                                            this.masterCache = {};
-                                            this.payload = ""
-                                            // this.forceShedule(480); // hardcoded
-                                        }
-                                    }
-                                }
+                                }       
+                                if (decodedChar == "$") {
+                                    this.payload = ""
+                                }                         
                             }
+                            
                         }
                     }
                 }
@@ -169,23 +149,6 @@ class Analyzer {
 
     stop() {
         this.killSwitch = true
-    }
-
-    clamp(value, min, max) {
-        return min < max ?
-            (value < min ? min : value > max ? max : value) :
-            (value < max ? max : value > min ? min : value)
-    }
-
-    frequencyToIndex(frequency, frequencyBinCount) {
-        let nyquist = sampleRate() / 2;
-        let index = Math.round(frequency / nyquist * frequencyBinCount);
-        return this.clamp(index, 0, frequencyBinCount);
-    }
-
-    indexToFreq(index, spectrum) {
-        let nyquist = sampleRate() / 2;
-        return nyquist / spectrum.length * index;
     }
 
     getFreqRanges() {
@@ -229,7 +192,7 @@ class Analyzer {
 
             this.receiveFstop = setTimeout(() => {
                 this.switchMic();
-                this.callTimeout(time1, this.getRndInteger(3, 6) * 200);
+                this.callTimeout(time1, Util.getRndInteger(3, 6) * 200);
             }, time1 + time2);
         }
     }
@@ -251,10 +214,10 @@ class Analyzer {
         } else {
             this.speakerSwitch = true;
             if (this.songBuffer) {
-                this.song = audioContext.createBufferSource();
+                this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
                 this.song.loop = false
-                this.song.connect(audioContext.destination);
+                this.song.connect(this.audioContext.destination);
                 this.song.start();
             }
         }
@@ -266,11 +229,9 @@ class Analyzer {
             this.switchMic();
         }
         if (!this.killSwitch) {
-            this.callTimeout(time1, this.getRndInteger(3, 6) * 200);
+            this.callTimeout(time1, Util.getRndInteger(3, 6) * 200);
         }
     }
 
-    getRndInteger(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
+
 }
