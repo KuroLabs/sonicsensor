@@ -43,9 +43,10 @@ class Sonic{
         let gainNode = offlineCtx.createGain();
         // Gain => Merger
         // gainNode.gain.value = window.PARAMS.GAINVAL || 100;
+        gainNode.gain.value = 0.9
         gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(1, startTime + this.rampDuration); //change gain here
-        gainNode.gain.setValueAtTime(1, startTime + duration - this.rampDuration);
+        gainNode.gain.linearRampToValueAtTime(0.9, startTime + this.rampDuration); //change gain here
+        gainNode.gain.setValueAtTime(0.9, startTime + duration - this.rampDuration);
         gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
     
         gainNode.connect(offlineCtx.destination);

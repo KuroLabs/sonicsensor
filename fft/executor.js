@@ -56,7 +56,7 @@ class Analyzer {
 
     start() {
         this.killSwitch = false
-        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 30
+        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
         this.callTimeout(songDuration,900);
         // this.switchMic()
@@ -131,7 +131,7 @@ class Analyzer {
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
                                         this.payload = ""
-                                        this.forceShedule(480); //hardcoded
+                                        this.forceShedule(500); //hardcoded
                                     }
                                 }       
                                 if (decodedChar == "$") {
