@@ -2,7 +2,7 @@
 import Analyzer from './src/executor.js';
 
 
-function bootstrap(p5) {
+function bootstrap(p) {
     let config = {
         alphabet: '^ABC123$',
         data: 'B',
@@ -15,7 +15,7 @@ function bootstrap(p5) {
     }
 
 
-    let analyzer = new Analyzer(p5, config);
+    let analyzer = new Analyzer(p, config);
 
     function cb(params, energy, success) {
         console.log("RECORDED", params, energy, success);
@@ -25,22 +25,22 @@ function bootstrap(p5) {
         console.log("State :" + state)
     }
 
-    p5.setup = () => {
+    p.setup = () => {
         analyzer.setup();
     }
 
-    p5.touchStarted = () => {
-        p5.getAudioContext().resume();
+    p.touchStarted = () => {
+        p.getAudioContext().resume();
     }
 
-    p5.draw = () => {
+    p.draw = () => {
         analyzer.draw();
     }
 
     activateButton.onclick = function () {
         analyzer.init(cb, switchF).then(() => {
-            p5.loop()
-            analyzer.start()
+            p.loop()
+            // analyzer.start()
         })
     }
 

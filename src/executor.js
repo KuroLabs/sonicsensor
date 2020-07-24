@@ -34,15 +34,15 @@ export default class Analyzer {
         const audioBuffer = this.sonic.send();
         audioBuffer.startRendering();
         audioBuffer.oncomplete = (e) => {
-            this.soundBuffer = e.renderedBuffer;
+            this.songBuffer = e.renderedBuffer;
         }
 
         // decode setup
         this.freqRanges = this.getFreqRanges();
         this.audioContext = new window.AudioContext;
         this.p5.getAudioContext().resume();
-        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapbell.mp3");
-        // p5 setup
+        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snap.mp3");
+        // p5 
         this.mic = new p5.AudioIn();
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
@@ -51,6 +51,7 @@ export default class Analyzer {
 
 
     setup() {
+        // let cnv = this.p5.createCanvas(1200, 600);
         this.p5.noLoop();
     }
 
@@ -66,20 +67,19 @@ export default class Analyzer {
     draw() {
 
         const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
-
         if (this.started) {
             //SETUP FFT GRAPH
-            // background(0);
-            // noStroke();
-            // fill(240, 150, 150);
+            // this.p5.background(0);
+            // this.p5.noStroke();
+            // this.p5.fill(240, 150, 150);
             let spectrum = this.fft.analyze(); //CRITICAL
-            //DRAW PEAKS
+            // //DRAW PEAKS
             // for (let i = 0; i < spectrum.length; i++) {
-            //     let x = map(i, 0, spectrum.length, 0, width);
-            //     let h = -height + map(spectrum[i], 0, 255, height, 0);
-            //     rect(x, height, width / spectrum.length, h)
+            //     let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
+            //     let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
+            //     this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
             // }
-            // endShape();
+            // this.p5.endShape();
 
 
             // DECODE---------------
@@ -224,7 +224,7 @@ export default class Analyzer {
             this.speakerSwitch = false;
         } else {
             this.speakerSwitch = true;
-            if (this.soundBuffer) {
+            if (this.songBuffer) {
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
                 this.song.loop = false
