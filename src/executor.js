@@ -48,7 +48,7 @@ export default class Analyzer {
         this.mic = new p5.AudioIn();
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
-        this.started = true;
+        this.started = false;
     }
 
 
@@ -59,7 +59,8 @@ export default class Analyzer {
 
     start() {
         this.killSwitch = false
-        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 70
+        this.mic.start();
+        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
         this.callTimeout(songDuration, 900);
         // this.switchMic()
@@ -68,8 +69,8 @@ export default class Analyzer {
 
     draw() {
 
-        const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
         if (this.started) {
+            const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
             //SETUP FFT GRAPH
             // this.p5.background(0);
             // this.p5.noStroke();
@@ -151,6 +152,7 @@ export default class Analyzer {
 
     stop() {
         this.queue.empty();
+        this.mic.stop()
         this.killSwitch = true
     }
 
@@ -210,12 +212,10 @@ export default class Analyzer {
     }
 
     switchMic() {
-        if (this.micSwitch) {
-            this.micSwitch = false;
-            this.mic.stop();
+        if (this.started) {
+            this.started = false;
         } else {
-            this.micSwitch = true;
-            this.mic.start();
+            this.started = true;
             if (!this.queue.isEmpty()) {
                 if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
                     this.queue.dequeue();
