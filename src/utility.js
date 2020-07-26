@@ -71,15 +71,18 @@ export default class Util {
             enqueue: function (data) {
                 items.push(data);
             },
+            length: function () {
+                return items.length;
+            },
             isEmpty: function () { return items.length === 0 },
             dequeue: function () {
                 if (this.isEmpty())
-                    throw "Queue is empty"
+                    return "Queue is empty"
                 items.shift();
             },
             front: function () {
                 if (this.isEmpty())
-                    throw "No elements in Queue";
+                    return "No elements in Queue";
                 return items[0];
             },
             empty: function () {

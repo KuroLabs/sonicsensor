@@ -24,6 +24,7 @@ export default class Analyzer {
         this.alertBuffer = null;
         this.freqRanges = null;
         this.masterCache = {};
+
     }
 
     async init(notify, switchF) {
@@ -48,7 +49,7 @@ export default class Analyzer {
         this.mic = new p5.AudioIn();
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
-        this.started = false;
+        this.started = true;
     }
 
 
@@ -59,7 +60,6 @@ export default class Analyzer {
 
     start() {
         this.killSwitch = false
-        this.mic.start();
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
         this.callTimeout(songDuration, 900);
@@ -68,15 +68,17 @@ export default class Analyzer {
     }
 
     draw() {
-
         if (this.started) {
+
+
             const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
-            //SETUP FFT GRAPH
+            // SETUP FFT lGRAPH
             // this.p5.background(0);
             // this.p5.noStroke();
             // this.p5.fill(240, 150, 150);
-            let spectrum = this.fft.analyze(); //CRITICAL
-            // //DRAW PEAKS
+            let spectrum = this.fft.analyze();
+            //CRITICAL
+            //DRAW PEAKS
             // for (let i = 0; i < spectrum.length; i++) {
             //     let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
             //     let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
@@ -95,17 +97,24 @@ export default class Analyzer {
             let maxx = this.p5.max(spectrum.slice(startIndex))
             let index = spectrum.indexOf(maxx)
 
+
             //DECODE CHAR PROCESS
             if (maxx > threshold) {
+
+
                 let f = Util.indexToFreq(this.p5.sampleRate(), index, spectrum);
+
+
+
                 if (freqMin - f < freqError && f <= freqMax) {
 
                     //DEBUG ************
-                    document.querySelector("#debugfreq").innerHTML = f;
                     //DEBUG ************
 
                     let decodedChar = this.sonic.freqToChar(f);
+
                     let energy = testEnergyArr[alphabet.indexOf(decodedChar)]
+
 
                     if (energy <= 160 && energy >= 70) {
                         if (decodedChar in this.masterCache) {
@@ -117,19 +126,24 @@ export default class Analyzer {
                             this.masterCache[decodedChar]['count'] = 1
                         }
 
-                        if (this.masterCache[decodedChar]['count'] >= 2) {
+                        if (this.masterCache[decodedChar]['count'] >= 10) {
+
+
                             // Monitors for payload
                             if (decodedChar == "^") {
                                 this.payload = "^";
                             } else if (decodedChar == "$" || this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
-                                this.payload += decodedChar;
+                                this.payload += decodedChar; ``
                                 if (Util.minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
-                                    let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
+                                    let success = reqEnergy.filter(x => x > 115).length >= Math.ceil(this.payload.length / 2)
+                                    document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
+
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
                                         this.queue.enqueue(1);
+                                        document.querySelector("h1").innerHTML = "Enqued : " + this.queue.length()
                                         console.warn("[DEBUG] payload: ", this.payload);
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
@@ -152,8 +166,8 @@ export default class Analyzer {
 
     stop() {
         this.queue.empty();
-        this.mic.stop()
         this.killSwitch = true
+        this.mic.stop()
     }
 
     getFreqRanges() {
@@ -186,7 +200,7 @@ export default class Analyzer {
     }
 
     randomRecurse() {
-        let newRand = Util.getRndInteger(3, 7) * 200;
+        let newRand = Util.getRndInteger(2, 7) * 200;
         if (newRand !== this.lastRandom && Util.twoHundredBound(newRand, this.lastRandom))
             return newRand
         return this.randomRecurse();
@@ -194,11 +208,14 @@ export default class Analyzer {
 
     callTimeout(time1, time2) {
         if (!this.killSwitch) { // switch for killing this loop
+
             this.switchSpeaker();
             this.switchF("Send");
+            console.log("Status : Send")
             setTimeout(() => {
                 this.switchSpeaker();
                 this.switchMic();
+                console.log("Status : Receive")
                 this.switchF("Receive");
             }, time1);
 
@@ -212,15 +229,19 @@ export default class Analyzer {
     }
 
     switchMic() {
-        if (this.started) {
-            this.started = false;
+        if (this.micSwitch) {
+            this.mic.stop();
+            this.micSwitch = false;
         } else {
-            this.started = true;
+            this.micSwitch = true;
+            this.mic.start();
             if (!this.queue.isEmpty()) {
                 if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
                     this.queue.dequeue();
                     this.heartbeat = this.iterator;
                     this.playAlert();
+                } else {
+                    this.queue.dequeue();
                 }
 
             }

@@ -15,18 +15,38 @@
     <button id="startButton">start</button>
     <button id="stopButton">stop</button>
     <p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
+    <h1 style="color: green;"></h1>
+    <h2 style="color: purple;"></h2>
 
     <!-- MOBILE DEBUGGING -->
-    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>
-        eruda.init();
-    </script>
+
     <script src="/vendor/p5.js"></script>
 
     <script src="/vendor/p5.sound.js"></script>
 
 
     <script src="/dist/sonicsensor.min.js"></script>
+    <!-- <script>
+
+
+
+        let worker = new Worker("./worker.js");
+
+        worker.addEventListener("message", (e) => {
+            console.log(e.data);
+        })
+
+
+        document.querySelector("#startButton").addEventListener("click", () => {
+            worker.postMessage("start");
+        });
+
+        document.querySelector("#stopButton").addEventListener("click", () => {
+            worker.postMessage("stop");
+        });
+
+
+    </script> -->
 
 
 </body>
