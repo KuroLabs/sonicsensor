@@ -91,6 +91,10 @@ export default class Util {
         }
     }
 
+    static twoHundredBound(a, b) {
+        return Math.abs(a - b) >= 200;
+    }
+
     static indexToFreq(sampleRate, index, spectrum) {
         let nyquist = sampleRate / 2;
         return nyquist / spectrum.length * index;

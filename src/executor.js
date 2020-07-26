@@ -14,6 +14,7 @@ export default class Analyzer {
         this.killSwitch = false;
         this.receiveFstop = null;
         this.heartbeat = null;
+        this.lastRandom = 900;
         // Decoded String
         this.payload = "";
         this.iterator = 0;
@@ -41,7 +42,8 @@ export default class Analyzer {
         this.freqRanges = this.getFreqRanges();
         this.audioContext = new window.AudioContext;
         this.p5.getAudioContext().resume();
-        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snap.mp3");
+        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
+        console.log(this.alertBuffer)
         // p5 
         this.mic = new p5.AudioIn();
         this.fft = new p5.FFT();
@@ -57,7 +59,7 @@ export default class Analyzer {
 
     start() {
         this.killSwitch = false
-        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
+        let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 70
         console.log(songDuration)
         this.callTimeout(songDuration, 900);
         // this.switchMic()
@@ -181,6 +183,13 @@ export default class Analyzer {
         return FREQRANGES;
     }
 
+    randomRecurse() {
+        let newRand = Util.getRndInteger(3, 7) * 200;
+        if (newRand !== this.lastRandom && Util.twoHundredBound(newRand, this.lastRandom))
+            return newRand
+        return this.randomRecurse();
+    }
+
     callTimeout(time1, time2) {
         if (!this.killSwitch) { // switch for killing this loop
             this.switchSpeaker();
@@ -194,7 +203,8 @@ export default class Analyzer {
             this.receiveFstop = setTimeout(() => {
                 this.switchMic();
                 this.iterator += 1;
-                this.callTimeout(time1, Util.getRndInteger(3, 6) * 200);
+                this.lastRandom = this.randomRecurse();
+                this.callTimeout(time1, this.lastRandom);
             }, time1 + time2);
         }
     }
