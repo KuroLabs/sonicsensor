@@ -1,0 +1,7 @@
+{
+    "name": "Sonic-Sensor",
+    "short_name": "Sonic-Sensor",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fff"
+}
