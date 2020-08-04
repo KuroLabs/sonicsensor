@@ -121,35 +121,61 @@
         </div>
 
     </main><!-- /.container -->
+    <!-- MOBILE DEBUGGING -->
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        eruda.init();
+    </script>
 
+    <!-- REGISTER SERVICE WORKER -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((reg) => {
+                        console.log('[INDEX] serviceWorker registered.', reg);
+                    })
+                    .catch((err) => {
+                        console.log('[INDEX] Error registering serviceWorker.', err);
+                    });
+            });
+        } else {
+            console.error('[INDEX] serviceWorker not supported');
+        }
+    </script>
+
+    <!-- UI -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="./pagePiling.js/dist/jquery.pagepiling.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TimelineMax.min.js"></script>
 
+    <!-- SONIC -->
+    <!-- <script src="/vendor/p5.js"></script>
+    <script src="/vendor/p5.sound.js"></script>
+    <script src="/dist/sonicsensor.min.js"></script> -->
+
     <script>
-
-        (async function () {
-            var f = 0
-            var ls = document.querySelector("#ls");
-            var inh = document.querySelector("#intext");
-
-            let listen = await fetch("./listen.json")
-            let listenJson = await listen.json();
-            let goo = await fetch("./googleassist.json")
-            let gooJson = await goo.json();
-            setInterval(() => {
-                if (f) {
-                    inh.textContent = " Chirping.. "
-                    ls.load(gooJson);
-                    f = 0;
-                } else {
-                    inh.textContent = " Picking up energy waves nearby.. "
-                    ls.load(listenJson);
-                    f = 1;
-                }
-            }, 3000);
-        })();
+        // (async function () {
+        //     var f = 0
+        //     var ls = document.querySelector("#ls");
+        //     var inh = document.querySelector("#intext");
+        //     let listen = await fetch("./listen.json")
+        //     let listenJson = await listen.json();
+        //     let goo = await fetch("./googleassist.json")
+        //     let gooJson = await goo.json();
+        //     setInterval(() => {
+        //         if (f) {
+        //             inh.textContent = " Chirping.. "
+        //             ls.load(gooJson);
+        //             f = 0;
+        //         } else {
+        //             inh.textContent = " Picking up energy waves nearby.. "
+        //             ls.load(listenJson);
+        //             f = 1;
+        //         }
+        //     }, 3000);
+        // })();
 
         $(document).ready(function () {
             $('#pagepiling').pagepiling({
@@ -168,8 +194,7 @@
 
                 var tween = new TimelineMax({
                     onComplete() {
-                        bolt.removeClass('animate');
-                        repeat();
+                        bolt.removeClass('animate');         
                     }
                 }).set(div, {
                     rotation: 360
@@ -191,7 +216,7 @@
                 function repeat() {
                     setTimeout(() => {
                         bolt.addClass('animate');
-                        tween.restart();
+                        tween.restart();                //TWEEN
                     }, 400);
                 }
 
@@ -200,13 +225,15 @@
             var addRule = (function (style) {
                 var sheet = document.head.appendChild(style).sheet;
                 return function (selector, css) {
-                    var propText = typeof css === "string" ? css : Object.keys(css).map(function (p) {
+                    var propText = typeof css === "string" ? css : Object.keys(css).map(function (
+                        p) {
                         return p + ":" + (p === "content" ? "'" + css[p] + "'" : css[p]);
                     }).join(";");
                     sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
                 };
             })(document.createElement("style"));
 
+            // MAIN ENTRY POINT INIT
             document.querySelector(".circle").addEventListener("click", () => {
 
                 document.querySelectorAll(".fonts-social").forEach((el) => {
@@ -221,22 +248,28 @@
                     });
 
                     setTimeout(() => {
-                        document.querySelector(".circle").classList.add("scale-out-center");
+                        document.querySelector(".circle").classList.add(
+                            "scale-out-center");
                         setTimeout(() => {
-                            document.querySelector("#activate").innerHTML = "<lottie-player src='./anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
+                            document.querySelector("#activate").innerHTML =
+                                "<lottie-player src='./anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
                             setTimeout(() => {
                                 $.fn.pagepiling.moveSectionDown();
                                 setTimeout(() => {
                                     document.querySelector("#activate").innerHTML = "<lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
                                     document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
-
-                                    document.querySelectorAll(".fonts-social").forEach((el) => {
-                                        el.classList.remove("darkcolor")
-                                    });
+                                    document.querySelectorAll(".fonts-social")
+                                        .forEach((el) => {
+                                            el.classList
+                                                .remove(
+                                                    "darkcolor"
+                                                )
+                                        });
 
                                     addRule(".containblack::before", {
                                         opacity: "1"
                                     });
+
                                     document.querySelector("#energyid").innerHTML = "105";
                                     document.querySelector("#energyalert").innerHTML = "Energy greater than 100. You are close to someone stepback"
 
@@ -252,16 +285,21 @@
                             }, 2800)
                         }, 200);
                     }, 300);
-
                 }, 200);
-
-
             });
         });
-
-
     </script>
 
 </body>
 
 </html>
+
+/*
+True or false
+    1. dark or red mode 
+
+independant alwyas
+    2. alert string - energy  reading
+
+start button - init
+*/

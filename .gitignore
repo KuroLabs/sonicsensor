@@ -1,2 +1,4 @@
-node_modules
-dist/sonicsensor.min.js
+**/.vscode/
+**/.DS_Store 
+**/node_modules
+**/dist/sonicsensor.min.js
