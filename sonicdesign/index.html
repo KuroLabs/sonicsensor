@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="stylesheet" type="text/css" href="./pagePiling.js/jquery.pagepiling.css" />
+    <link rel="stylesheet" type="text/css" href="./pagePiling/jquery.pagepiling.css" />
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
@@ -44,6 +44,7 @@
                         <br>
                         <br>
                         <br>
+                        <button id="preactivate"> Preactivate </button>
                         <div class="d-flex justify-content-center" id="activate">
                             <div class="circle bgbutton-start push-on-hover">
                                 <p class="text fontPrimary" onselectstart="return false"> Activate</p>
@@ -109,10 +110,10 @@
                     <br>
 
                     <div class="d-flex justify-content-center">
-                        <lottie-player id="ls" background="transparent" speed="1" class="listen" loop autoplay>
+                        <lottie-player id="ls" background="transparent" speed="2" class="listen" loop autoplay>
                         </lottie-player>
                     </div>
-                    <p id="intext" class="text-center regular"></p>
+                    <p id="intext" class="text-center regular"> Picking up energy waves nearby..</p>
 
                 </div>
             </div>
@@ -146,14 +147,14 @@
 
     <!-- UI -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="./pagePiling.js/dist/jquery.pagepiling.min.js"></script>
+    <script type="text/javascript" src="./pagePiling/dist/jquery.pagepiling.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TimelineMax.min.js"></script>
 
     <!-- SONIC -->
-    <!-- <script src="/vendor/p5.js"></script>
-    <script src="/vendor/p5.sound.js"></script>
-    <script src="/dist/sonicsensor.min.js"></script> -->
+    <script src="../vendor/p5.js"></script>
+    <script src="../vendor/p5.sound.js"></script>
+    <script src="../dist/sonicsensor.min.js"></script>
 
     <script>
         // (async function () {
@@ -177,117 +178,117 @@
         //     }, 3000);
         // })();
 
-        $(document).ready(function () {
-            $('#pagepiling').pagepiling({
-                scrollingSpeed: 300,
-                navigation: false,
-                keyboardScrolling: false,
-            });
+        // $(document).ready(function () {
+        //     $('#pagepiling').pagepiling({
+        //         scrollingSpeed: 300,
+        //         navigation: false,
+        //         keyboardScrolling: false,
+        //     });
 
 
-            $('.bolt').each(function (e) {
+        //     $('.bolt').each(function (e) {
 
-                var bolt = $(this),
-                    div = $(this).children('div');
+        //         var bolt = $(this),
+        //             div = $(this).children('div');
 
-                bolt.addClass('animate');
+        //         bolt.addClass('animate');
 
-                var tween = new TimelineMax({
-                    onComplete() {
-                        bolt.removeClass('animate');         
-                    }
-                }).set(div, {
-                    rotation: 360
-                }).to(div, .7, {
-                    y: 80,
-                    rotation: 370
-                }).to(div, .6, {
-                    y: -140,
-                    rotation: 20
-                }).to(div, .1, {
-                    rotation: -24,
-                    y: 80
-                }).to(div, .8, {
-                    ease: Back.easeOut.config(1.6),
-                    rotation: 0,
-                    y: 0
-                });
+        //         var tween = new TimelineMax({
+        //             onComplete() {
+        //                 bolt.removeClass('animate');         
+        //             }
+        //         }).set(div, {
+        //             rotation: 360
+        //         }).to(div, .7, {
+        //             y: 80,
+        //             rotation: 370
+        //         }).to(div, .6, {
+        //             y: -140,
+        //             rotation: 20
+        //         }).to(div, .1, {
+        //             rotation: -24,
+        //             y: 80
+        //         }).to(div, .8, {
+        //             ease: Back.easeOut.config(1.6),
+        //             rotation: 0,
+        //             y: 0
+        //         });
 
-                function repeat() {
-                    setTimeout(() => {
-                        bolt.addClass('animate');
-                        tween.restart();                //TWEEN
-                    }, 400);
-                }
+        //         function repeat() {
+        //             setTimeout(() => {
+        //                 bolt.addClass('animate');
+        //                 tween.restart();                //TWEEN
+        //             }, 400);
+        //         }
 
-            })
+        //     })
 
-            var addRule = (function (style) {
-                var sheet = document.head.appendChild(style).sheet;
-                return function (selector, css) {
-                    var propText = typeof css === "string" ? css : Object.keys(css).map(function (
-                        p) {
-                        return p + ":" + (p === "content" ? "'" + css[p] + "'" : css[p]);
-                    }).join(";");
-                    sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
-                };
-            })(document.createElement("style"));
+            // var addRule = (function (style) {
+            //     var sheet = document.head.appendChild(style).sheet;
+            //     return function (selector, css) {
+            //         var propText = typeof css === "string" ? css : Object.keys(css).map(function (
+            //             p) {
+            //             return p + ":" + (p === "content" ? "'" + css[p] + "'" : css[p]);
+            //         }).join(";");
+            //         sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
+            //     };
+            // })(document.createElement("style"));
 
             // MAIN ENTRY POINT INIT
-            document.querySelector(".circle").addEventListener("click", () => {
+        //     document.querySelector(".circle").addEventListener("click", () => {
 
-                document.querySelectorAll(".fonts-social").forEach((el) => {
-                    el.classList.add("darkcolor")
-                })
+        //         document.querySelectorAll(".fonts-social").forEach((el) => {
+        //             el.classList.add("darkcolor")
+        //         })
 
 
-                document.querySelector(".circle").classList.add("animatepush");
-                setTimeout(() => {
-                    addRule(".circle:before", {
-                        animation: "ripple 0.3s 1"
-                    });
+        //         document.querySelector(".circle").classList.add("animatepush");
+        //         setTimeout(() => {
+        //             addRule(".circle:before", {
+        //                 animation: "ripple 0.3s 1"
+        //             });
 
-                    setTimeout(() => {
-                        document.querySelector(".circle").classList.add(
-                            "scale-out-center");
-                        setTimeout(() => {
-                            document.querySelector("#activate").innerHTML =
-                                "<lottie-player src='./anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
-                            setTimeout(() => {
-                                $.fn.pagepiling.moveSectionDown();
-                                setTimeout(() => {
-                                    document.querySelector("#activate").innerHTML = "<lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
-                                    document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
-                                    document.querySelectorAll(".fonts-social")
-                                        .forEach((el) => {
-                                            el.classList
-                                                .remove(
-                                                    "darkcolor"
-                                                )
-                                        });
+        //             setTimeout(() => {
+        //                 document.querySelector(".circle").classList.add(
+        //                     "scale-out-center");
+        //                 setTimeout(() => {
+        //                     document.querySelector("#activate").innerHTML =
+        //                         "<lottie-player src='./anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
+        //                     setTimeout(() => {
+        //                         $.fn.pagepiling.moveSectionDown();
+        //                         setTimeout(() => {
+        //                             document.querySelector("#activate").innerHTML = "<lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
+        //                             document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
+        //                             document.querySelectorAll(".fonts-social")
+        //                                 .forEach((el) => {
+        //                                     el.classList
+        //                                         .remove(
+        //                                             "darkcolor"
+        //                                         )
+        //                                 });
 
-                                    addRule(".containblack::before", {
-                                        opacity: "1"
-                                    });
+        //                             addRule(".containblack::before", {
+        //                                 opacity: "1"
+        //                             });
 
-                                    document.querySelector("#energyid").innerHTML = "105";
-                                    document.querySelector("#energyalert").innerHTML = "Energy greater than 100. You are close to someone stepback"
+        //                             document.querySelector("#energyid").innerHTML = "105";
+        //                             document.querySelector("#energyalert").innerHTML = "Energy greater than 100. You are close to someone stepback"
 
-                                    setTimeout(() => {
-                                        addRule(".containblack::before", {
-                                            opacity: "0"
-                                        });
-                                        document.querySelector("#energyid").innerHTML = "65";
-                                        document.querySelector("#energyalert").innerHTML = "Energy less than 100. Excellent! Keep up the distance"
+        //                             setTimeout(() => {
+        //                                 addRule(".containblack::before", {
+        //                                     opacity: "0"
+        //                                 });
+        //                                 document.querySelector("#energyid").innerHTML = "65";
+        //                                 document.querySelector("#energyalert").innerHTML = "Energy less than 100. Excellent! Keep up the distance"
 
-                                    }, 5000)
-                                }, 700);
-                            }, 2800)
-                        }, 200);
-                    }, 300);
-                }, 200);
-            });
-        });
+        //                             }, 5000)
+        //                         }, 700);
+        //                     }, 2800)
+        //                 }, 200);
+        //             }, 300);
+        //         }, 200);
+        //     });
+        // });
     </script>
 
 </body>

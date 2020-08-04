@@ -1,9 +1,15 @@
-import Analyzer from './src/executor.js';
+import Analyzer from '../src/executor.js';
 
-const worker = new Worker("./worker.js");
+const worker = new Worker("../worker.js");
 
-
-
+var listenJson;
+var gooJson;
+async function loadLottie () {
+    let listen = await fetch("./listen.json")
+    listenJson = await listen.json();
+    let goo = await fetch("./googleassist.json")
+    gooJson = await goo.json();
+}
 
 function bootstrap(p) {
     let config = {
@@ -15,108 +21,162 @@ function bootstrap(p) {
         freqMax: 19000,
         freqError: 50,
         threshold: 0,
+        energyFilter: 115,
     }
 
-    (async function () {
-        var f = 0
-        var ls = document.querySelector("#ls");
-        var inh = document.querySelector("#intext");
-        let listen = await fetch("./listen.json")
-        let listenJson = await listen.json();
-        let goo = await fetch("./googleassist.json")
-        let gooJson = await goo.json();
-
-        // if (f) {
-        //     inh.textContent = " Chirping.. "         // f=1 sending
-        //     ls.load(gooJson);
-        //     f = 0;
-        // } else {
-        //     inh.textContent = " Picking up energy waves nearby.. "  // f=0 receiving
-        //     ls.load(listenJson);
-        //     f = 1;
-        // }
-    })();
-
-
-    $('.bolt').each(function (e) {
-
-        var bolt = $(this),
-            div = $(this).children('div');
-
-        bolt.addClass('animate');
-
-        var tween = new TimelineMax({
-            onComplete() {
-                bolt.removeClass('animate');         
-            }
-        }).set(div, {
-            rotation: 360
-        }).to(div, .7, {
-            y: 80,
-            rotation: 370
-        }).to(div, .6, {
-            y: -140,
-            rotation: 20
-        }).to(div, .1, {
-            rotation: -24,
-            y: 80
-        }).to(div, .8, {
-            ease: Back.easeOut.config(1.6),
-            rotation: 0,
-            y: 0
+    loadLottie().then(() => console.log("Loaded LottieFiles"))
+    var addRule = function (selector, css) {
+        let style = document.createElement("style")
+        var sheet = document.head.appendChild(style).sheet;
+        var propText = typeof css === "string" ? css : Object.keys(css).map(function (
+            p) {
+            return p + ":" + (p === "content" ? "'" + css[p] + "'" : css[p]);
+        }).join(";");
+        sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
+    };
+    $(document).ready(function () {
+        $('#pagepiling').pagepiling({
+            scrollingSpeed: 300,
+            navigation: false,
+            keyboardScrolling: false,
         });
-
-        function repeat() {
-            setTimeout(() => {
-                bolt.addClass('animate');
-                tween.restart();                //TWEEN
-            }, 400);
-        }
+        $('.bolt').each(function (e) {
+    
+            var bolt = $(this),
+                div = $(this).children('div');
+    
+            bolt.addClass('animate');
+    
+            var tween = new TimelineMax({
+                onComplete() {
+                    bolt.removeClass('animate');         
+                }
+            }).set(div, {
+                rotation: 360
+            }).to(div, .7, {
+                y: 80,
+                rotation: 370
+            }).to(div, .6, {
+                y: -140,
+                rotation: 20
+            }).to(div, .1, {
+                rotation: -24,
+                y: 80
+            }).to(div, .8, {
+                ease: Back.easeOut.config(1.6),
+                rotation: 0,
+                y: 0
+            });
+    
+            
+                
+            // bolt.addClass('animate');      // Energy changes
+            // tween.restart();                //TWEEN
+                
+        })
 
     })
+    
 
 
-    // let analyzer = new Analyzer(p, config);
 
-    // function cb(params, energy, success) {
-    //     document.querySelector("p").innerHTML = params + ' - ' + energy + " - " + success;
-    //     console.log("RECORDED", params, energy, success);
-    // }
 
-    // function switchF(state) {
-    //     console.log("State :" + state)
-    // }
+    let analyzer = new Analyzer(p, config);
 
-    // p.setup = () => {
-    //     analyzer.setup();
-    // }
+    function cb(params, energy, success) {
+
+        console.log("RECORDED", params, energy, success);
+
+        //flash
+        bolt.addClass('animate');      
+        tween.restart();                
+        // Toggle screen
+        if(energy > config.energyFilter){      
+            addRule(".containblack::before", {
+                opacity: "1"
+            });
+            document.querySelector("#energyid").innerHTML = energy;
+            document.querySelector("#energyalert").innerHTML = `Energy greater than ${energy}. You are close to someone stepback`
+        } else {
+            addRule(".containblack::before", {
+                opacity: "0"
+            });
+            document.querySelector("#energyid").innerHTML = energy;
+            document.querySelector("#energyalert").innerHTML = `Energy less than ${energy}. Excellent! Keep up the distance`    
+        }
+    }
+
+    function switchF(state) {
+        console.log("State :" + state)
+        if (state === "Receive") {
+            ls.load(listenJson);
+            ls.style.visibility = "visible"
+            // intext.textContent = " Chirping.. "
+            // ls.load(gooJson);
+        } else{
+            ls.style.visibility = "hidden"
+        }
+    }
+
+    p.setup = () => {
+        analyzer.setup();
+    }
+    document.querySelector("#preactivate").onclick = function() {
+        analyzer.init(cb, switchF).then(() => {
+            console.log("setupDone")
+        })
+    }
 
     // p.touchStarted = () => {
     //     p.getAudioContext().resume();
     // }
 
-    // // p.draw = () => {
-    // //     analyzer.draw();
-    // // }
+   
 
-    // worker.addEventListener("message", (e) => {
-    //     analyzer.draw();
-    // })
+    worker.addEventListener("message", (e) => {
+        analyzer.draw();
+    })
 
+    document.querySelector(".circle").onclick = () => {
+        analyzer.start()
+        // worker.postMessage("start");
 
+        // css fr start-button
+        document.querySelectorAll(".fonts-social").forEach((el) => {
+            el.classList.add("darkcolor")
+        })
+        document.querySelector(".circle").classList.add("animatepush");
+        setTimeout(() => {
+            addRule(".circle:before", {
+                animation: "ripple 0.3s 1"
+            });
 
-    // activateButton.onclick = function () {
-    //     analyzer.init(cb, switchF).then(() => {
-    //         // p.loop()
-    //         // analyzer.start()
-    //     })
-    // }
+            setTimeout(() => {
+                document.querySelector(".circle").classList.add(
+                    "scale-out-center");
+                setTimeout(() => {
+                    document.querySelector("#activate").innerHTML =
+                        "<lottie-player src='./anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
+                    setTimeout(() => {
+                        $.fn.pagepiling.moveSectionDown();
+                        setTimeout(() => {
+                            document.querySelector("#activate").innerHTML = "<lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
+                            document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
+                            document.querySelectorAll(".fonts-social")
+                                .forEach((el) => {
+                                    el.classList
+                                        .remove(
+                                            "darkcolor"
+                                        )
+                                });
+                            
+                        }, 700);
+                    }, 2800)
+                }, 200);
+            }, 300);
+        }, 200);
 
-    // startButton.onclick = function () {
-    //     analyzer.start()
-    //     worker.postMessage("start");
-
-    // }
+    }
 
     // stopButton.onclick = function () {
     //     analyzer.stop()

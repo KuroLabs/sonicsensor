@@ -3,7 +3,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 
 module.exports = {
-    entry: './index.js',
+    entry: './sonicdesign/index.js',
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {

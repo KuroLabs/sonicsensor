@@ -137,7 +137,7 @@ export default class Analyzer {
                                 if (Util.minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
-                                    let success = reqEnergy.filter(x => x > 115).length >= Math.ceil(this.payload.length / 2)
+                                    let success = reqEnergy.filter(x => x > this.config.energyFilter).length >= Math.ceil(this.payload.length / 2)
                                     document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
