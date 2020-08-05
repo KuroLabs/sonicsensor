@@ -288,6 +288,32 @@
         //         }, 200);
         //     });
         // });
+        if ('wakeLock' in navigator) {
+            let wakeLock = null;
+
+            // Function that attempts to request a screen wake lock.
+            const requestWakeLock = async () => {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLock.addEventListener('release', () => {
+                console.log('Screen Wake Lock was released');
+                });
+                console.log('Screen Wake Lock is active');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+            };
+
+            // Request a screen wake lock…
+            requestWakeLock();
+            const handleVisibilityChange = () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                requestWakeLock();
+            }
+            };
+
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
     </script>
 
 </body>

@@ -150,7 +150,7 @@ function bootstrap(p) {
     document.querySelector(".circle").onclick = async () => {
         await analyzer.init(cb, switchF)
         analyzer.start()
-        // worker.postMessage("start");
+        worker.postMessage("start");
 
         // css fr start-button
         document.querySelectorAll(".fonts-social").forEach((el) => {
@@ -186,6 +186,8 @@ function bootstrap(p) {
                                     document.querySelector(".fa-play").classList.add("animateClick");
                                     bearAnimate(true);
                                     // Do anything for play
+                                    analyzer.start()
+                                    worker.postMessage("start");
                                     toggleState = true;
                                 } else if (e.target.classList.contains("stop-id") || e.target.classList.contains("fa-stop")) {
                                     document.querySelector("#acttext").innerHTML = "Sleeping......"
@@ -198,6 +200,8 @@ function bootstrap(p) {
                                     document.querySelector(".fa-stop").classList.add("animateClick");
                                     bearAnimate(false);
                                     //Do anything to stop
+                                    analyzer.stop()
+                                    worker.postMessage("stop");
                                     toggleState = false;
                                 }
                             });
