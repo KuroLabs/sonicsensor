@@ -82,7 +82,7 @@ overflow-x: hidden;
     left:0;
     right:0;
     bottom: 0;
-    height: 85vh;
+    height: 87vh;
     background-color: #ffffff;
     border-bottom-left-radius: 50px;
     border-bottom-right-radius: 50px;
@@ -601,4 +601,64 @@ overflow-x: hidden;
     height:70px;
     transition: all 0.3s linear;
 }
+
+#activate{
+    position: relative;
+}
+
+.tooltip {
+  width: 190px;
+  height: 70px;
+  border-radius: 70px;
+  position: absolute;
+  background: #35393e;
+  z-index: 2;
+  padding: 0 15px;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 5px 26px;
+  opacity: 1;
+  top: -50px;
+  display: -webkit-box;
+  display: flex;
+  justify-content: space-around;
+  -webkit-box-align: center;
+          align-items: center;
+  transition: all 0.5s ease-in;
+}
+
+.tooltip::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: #35393e;
+  border-radius: 3px;
+  position: absolute;
+  left: 50%;
+  margin-left: -10px;
+  bottom: -8px;
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  z-index: 0;
+}
+
+.controllIcons{
+  color:white;
+  transition: all 0.1s linear;
+}
+
+.wrapperIcon{
+  flex:1;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+}
+
+.animateClick{
+  color:rgb(251 170 48);
+  transform: scale(2.5)
+}
+
+
   
