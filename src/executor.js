@@ -13,6 +13,7 @@ export default class Analyzer {
         this.speakerSwitch = false;
         this.killSwitch = false;
         this.receiveFstop = null;
+        this.sendFstop = null;
         this.heartbeat = null;
         this.lastRandom = 900;
         // Decoded String
@@ -43,10 +44,15 @@ export default class Analyzer {
         this.freqRanges = this.getFreqRanges();
         this.audioContext = new window.AudioContext;
         this.p5.getAudioContext().resume();
-        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
-        console.log(this.alertBuffer)
+        // this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
+        this.alertAudio  = new Audio();
+        let src1  = document.createElement("source");
+        src1.type = "audio/mpeg";
+        src1.src  = "/assets/snapnotify.mp3";
+        this.alertAudio.appendChild(src1);
         // p5 
         this.mic = new p5.AudioIn();
+        console.log(this.alertAudio,this.mic)
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
@@ -61,6 +67,8 @@ export default class Analyzer {
 
     start() {
         this.killSwitch = false
+        this.successStack = []
+        this.successCount = 0
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
         this.callTimeout(songDuration, 900);
@@ -171,8 +179,24 @@ export default class Analyzer {
 
     stop() {
         this.queue.empty();
+        this.successStack = []
+        this.successCount = 0
         this.killSwitch = true
         this.mic.stop()
+    }
+
+    testSuccess(success) {
+        this.successStack.push(success)
+        this.successCount += (success ? 1 : 0)
+        if(this.successStack.length < 3){
+            return success
+        } else{
+            if(this.successStack.length > 3){
+                this.successCount -= (this.successStack[0] ? 1 : 0)
+                this.successStack = this.successStack.slice(1)
+            }
+            return (this.successCount > 1)
+        }
     }
 
     getFreqRanges() {
@@ -216,11 +240,19 @@ export default class Analyzer {
 
             this.switchSpeaker();
             this.switchF("Send");
+<<<<<<< HEAD
             // console.log("Status : Send")
             setTimeout(() => {
                 this.switchSpeaker();
                 this.switchMic();
                 // console.log("Status : Receive")
+=======
+            console.log("Status : Send")
+            this.sendFstop = setTimeout(() => {
+                this.switchSpeaker();
+                this.switchMic();
+                console.log("Status : Receive",this.iterator)
+>>>>>>> 733103dbd536232bd1a301190eba3ca543abbccd
                 this.switchF("Receive");
             }, time1);
 
@@ -273,11 +305,12 @@ export default class Analyzer {
     }
 
     playAlert() {
-        if (this.alertBuffer) {
-            const alertSource = this.audioContext.createBufferSource();
-            alertSource.buffer = this.alertBuffer;
-            alertSource.connect(this.audioContext.destination);
-            alertSource.start();
+        if (this.alertAudio) {
+            // const alertSource = this.audioContext.createBufferSource();
+            // alertSource.buffer = this.alertBuffer;
+            // alertSource.connect(this.audioContext.destination);
+            // alertSource.start();
+            this.alertAudio.play()
         } else {
             throw "Alert sound not loaded"
         }
@@ -285,11 +318,14 @@ export default class Analyzer {
 
     forceShedule(time1) {
         if (this.receiveFstop) {
+            clearTimeout(this.sendFstop);
             clearTimeout(this.receiveFstop);
-            this.switchMic();
+            this.speakerSwitch = false;
+            this.micSwitch = false;
+            this.mic.stop();
         }
         if (!this.killSwitch) {
-            this.callTimeout(time1, Util.getRndInteger(3, 6) * 200);
+            this.callTimeout(time1, Util.getRndInteger(2, 7) * 200);
         }
     }
 

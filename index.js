@@ -54,10 +54,13 @@ function bootstrap(p) {
 
     startButton.onclick = function () {
         analyzer.start()
+        // worker.postMessage("start");
+
     }
 
     stopButton.onclick = function () {
         analyzer.stop()
+        // worker.postMessage("stop");
     }
 
 }
