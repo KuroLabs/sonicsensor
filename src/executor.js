@@ -50,11 +50,12 @@ export default class Analyzer {
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
+        this.p5.loop();
     }
 
 
     setup() {
-        // let cnv = this.p5.createCanvas(1200, 600);
+        // let cnv = this.p5.createCanvas(600, 600);
         this.p5.noLoop();
     }
 
@@ -126,18 +127,22 @@ export default class Analyzer {
                             this.masterCache[decodedChar]['count'] = 1
                         }
 
-                        if (this.masterCache[decodedChar]['count'] >= 10) {
+                        if (this.masterCache[decodedChar]['count'] >= 2) {
 
 
                             // Monitors for payload
                             if (decodedChar == "^") {
                                 this.payload = "^";
                             } else if (decodedChar == "$" || this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
-                                this.payload += decodedChar; ``
+                                this.payload += decodedChar;
+                                console.log(Util.minOperations("^" + data + "$", this.payload));
                                 if (Util.minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
+
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
-                                    let success = reqEnergy.filter(x => x > 115).length >= Math.ceil(this.payload.length / 2)
+                                    console.log(`Energy :` + reqEnergy.join('*-*'))
+
+                                    let success = reqEnergy.filter(x => x > 130).length >= Math.ceil(this.payload.length / 2)
                                     document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
@@ -211,11 +216,11 @@ export default class Analyzer {
 
             this.switchSpeaker();
             this.switchF("Send");
-            console.log("Status : Send")
+            // console.log("Status : Send")
             setTimeout(() => {
                 this.switchSpeaker();
                 this.switchMic();
-                console.log("Status : Receive")
+                // console.log("Status : Receive")
                 this.switchF("Receive");
             }, time1);
 

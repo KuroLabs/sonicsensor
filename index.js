@@ -4,11 +4,10 @@ import Analyzer from './src/executor.js';
 
 let worker = new Worker("./worker.js");
 
-
 function bootstrap(p) {
     let config = {
         alphabet: '^ABC123$',
-        data: 'A',
+        data: 'B',
         charDuration: 0.15,
         rampDuration: 0.06,
         freqMin: 18500,
@@ -26,7 +25,6 @@ function bootstrap(p) {
     }
 
     function switchF(state) {
-        console.log("State :" + state)
     }
 
     p.setup = () => {
@@ -37,13 +35,13 @@ function bootstrap(p) {
         p.getAudioContext().resume();
     }
 
-    // p.draw = () => {
-    //     analyzer.draw();
-    // }
-
-    worker.addEventListener("message", (e) => {
+    p.draw = () => {
         analyzer.draw();
-    })
+    }
+
+    // worker.addEventListener("message", (e) => {
+    //     analyzer.draw();
+    // })
 
 
 
@@ -56,13 +54,10 @@ function bootstrap(p) {
 
     startButton.onclick = function () {
         analyzer.start()
-        worker.postMessage("start");
-
     }
 
     stopButton.onclick = function () {
         analyzer.stop()
-        worker.postMessage("stop");
     }
 
 }
