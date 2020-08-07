@@ -37,13 +37,13 @@ function bootstrap(p) {
         p.getAudioContext().resume();
     }
 
-    // p.draw = () => {
-    //     analyzer.draw();
-    // }
-
-    worker.addEventListener("message", (e) => {
+    p.draw = () => {
         analyzer.draw();
-    })
+    }
+
+    // worker.addEventListener("message", (e) => {
+    //     analyzer.draw();
+    // })
 
 
 
@@ -56,13 +56,13 @@ function bootstrap(p) {
 
     startButton.onclick = function () {
         analyzer.start()
-        worker.postMessage("start");
+        // worker.postMessage("start");
 
     }
 
     stopButton.onclick = function () {
         analyzer.stop()
-        worker.postMessage("stop");
+        // worker.postMessage("stop");
     }
 
 }
