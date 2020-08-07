@@ -154,6 +154,7 @@
     <script src="../vendor/p5.js"></script>
     <script src="../vendor/p5.sound.js"></script>
     <script src="../dist/sonicsensor.min.js"></script>
+    <script src="../vendor/noSleep.js"></script>
 
     <script>
         // (async function () {
@@ -288,32 +289,37 @@
         //         }, 200);
         //     });
         // });
-        if ('wakeLock' in navigator) {
-            let wakeLock = null;
+        // if ('wakeLock' in navigator) {
+        //     let wakeLock = null;
 
-            // Function that attempts to request a screen wake lock.
-            const requestWakeLock = async () => {
-            try {
-                wakeLock = await navigator.wakeLock.request('screen');
-                wakeLock.addEventListener('release', () => {
-                console.log('Screen Wake Lock was released');
-                });
-                console.log('Screen Wake Lock is active');
-            } catch (err) {
-                console.error(`${err.name}, ${err.message}`);
-            }
-            };
+        //     // Function that attempts to request a screen wake lock.
+        //     const requestWakeLock = async () => {
+        //     try {
+        //         wakeLock = await navigator.wakeLock.request('screen');
+        //         wakeLock.addEventListener('release', () => {
+        //         console.log('Screen Wake Lock was released');
+        //         });
+        //         console.log('Screen Wake Lock is active');
+        //     } catch (err) {
+        //         console.error(`${err.name}, ${err.message}`);
+        //     }
+        //     };
 
-            // Request a screen wake lock…
-            requestWakeLock();
-            const handleVisibilityChange = () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                requestWakeLock();
-            }
-            };
+        //     // Request a screen wake lock…
+        //     requestWakeLock();
+        //     const handleVisibilityChange = () => {
+        //     if (wakeLock !== null && document.visibilityState === 'visible') {
+        //         requestWakeLock();
+        //     }
+        //     };
 
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-        }
+        //     document.addEventListener('visibilitychange', handleVisibilityChange);
+        // }
+        const noSleep = new NoSleep();
+        activate.addEventListener('click', function enableNoSleep() {
+        activate.removeEventListener('click', enableNoSleep, false);
+        noSleep.enable();
+        }, false);
     </script>
 
 </body>
