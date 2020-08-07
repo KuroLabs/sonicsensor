@@ -45,14 +45,14 @@ export default class Analyzer {
         this.audioContext = new window.AudioContext;
         this.p5.getAudioContext().resume();
         // this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
-        this.alertAudio  = new Audio();
-        let src1  = document.createElement("source");
+        this.alertAudio = new Audio();
+        let src1 = document.createElement("source");
         src1.type = "audio/mpeg";
-        src1.src  = "/assets/snapnotify.mp3";
+        src1.src = "/assets/snapnotify.mp3";
         this.alertAudio.appendChild(src1);
         // p5 
         this.mic = new p5.AudioIn();
-        console.log(this.alertAudio,this.mic)
+        console.log(this.alertAudio, this.mic)
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
@@ -188,10 +188,10 @@ export default class Analyzer {
     testSuccess(success) {
         this.successStack.push(success)
         this.successCount += (success ? 1 : 0)
-        if(this.successStack.length < 3){
+        if (this.successStack.length < 3) {
             return success
-        } else{
-            if(this.successStack.length > 3){
+        } else {
+            if (this.successStack.length > 3) {
                 this.successCount -= (this.successStack[0] ? 1 : 0)
                 this.successStack = this.successStack.slice(1)
             }
@@ -240,19 +240,11 @@ export default class Analyzer {
 
             this.switchSpeaker();
             this.switchF("Send");
-<<<<<<< HEAD
-            // console.log("Status : Send")
-            setTimeout(() => {
-                this.switchSpeaker();
-                this.switchMic();
-                // console.log("Status : Receive")
-=======
             console.log("Status : Send")
             this.sendFstop = setTimeout(() => {
                 this.switchSpeaker();
                 this.switchMic();
-                console.log("Status : Receive",this.iterator)
->>>>>>> 733103dbd536232bd1a301190eba3ca543abbccd
+                console.log("Status : Receive", this.iterator)
                 this.switchF("Receive");
             }, time1);
 
