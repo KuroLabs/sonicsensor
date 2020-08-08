@@ -6458,6 +6458,18 @@
           delete this.stream;
         }
       };
+
+      p5.AudioIn.prototype.mute = function () {
+        this.stream.getTracks().forEach((track) => {
+          track.enabled = false;
+        })
+      }
+
+      p5.AudioIn.prototype.unmute = function () {
+        this.stream.getTracks().forEach((track) => {
+          track.enabled = true;
+        })
+      }
       /**
        *  Connect to an audio unit. If no parameter is provided, will
        *  connect to the master output (i.e. your speakers).<br/>

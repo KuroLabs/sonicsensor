@@ -38,6 +38,7 @@ export default class Analyzer {
         audioBuffer.startRendering();
         audioBuffer.oncomplete = (e) => {
             this.songBuffer = e.renderedBuffer;
+            window.songBuffer = this.songBuffer;
         }
 
         // decode setup
@@ -56,12 +57,13 @@ export default class Analyzer {
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
+
         this.p5.loop();
     }
 
 
     setup() {
-        // let cnv = this.p5.createCanvas(600, 600);
+        let cnv = this.p5.createCanvas(600, 600);
         this.p5.noLoop();
     }
 
@@ -71,8 +73,9 @@ export default class Analyzer {
         this.successCount = 0
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
-        this.callTimeout(songDuration, 900);
-        // this.switchMic()
+        this.mic.start(() => {
+            this.playSonic();
+        });
         // this.switchSpeaker()
     }
 
@@ -82,18 +85,28 @@ export default class Analyzer {
 
             const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
             // SETUP FFT lGRAPH
-            // this.p5.background(0);
-            // this.p5.noStroke();
-            // this.p5.fill(240, 150, 150);
-            let spectrum = this.fft.analyze();
+            this.p5.background(0);
+            this.p5.noStroke();
+            this.p5.fill(240, 150, 150);
+            var spectrum = [];
+            if (!this.iamstopped) {
+                spectrum = this.fft.analyze();
+            }
+            if (spectrum.every(x => x == 0)) {
+                lol.textContent = "0"
+            } else {
+                lol.textContent = "222222222222222222220"
+            };
+
+
             //CRITICAL
             //DRAW PEAKS
-            // for (let i = 0; i < spectrum.length; i++) {
-            //     let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
-            //     let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
-            //     this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
-            // }
-            // this.p5.endShape();
+            for (let i = 0; i < spectrum.length; i++) {
+                let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
+                let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
+                this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
+            }
+            this.p5.endShape();
 
 
             // DECODE---------------
@@ -235,65 +248,107 @@ export default class Analyzer {
         return this.randomRecurse();
     }
 
-    callTimeout(time1, time2) {
+    // callTimeout(time1, time2) {
+    //     if (!this.killSwitch) { // switch for killing this loop
+
+    //         this.switchSpeaker();
+    //         this.switchF("Send");
+    //         statusElem.textContent = "Status : Send"
+    //         console.log("Status : Send")
+    //         this.sendFstop = setTimeout(() => {
+    //             this.switchSpeaker();
+    //             this.switchMic();
+    //             statusElem.textContent = "Status : Receive"
+    //             console.log("Status : Receive", this.iterator)
+    //             this.switchF("Receive");
+    //         }, time1);
+
+    //         this.receiveFstop = setTimeout(() => {
+    //             this.switchMic();
+    //             this.iterator += 1;
+    //             this.lastRandom = this.randomRecurse();
+    //             this.callTimeout(time1, this.lastRandom);
+    //         }, time1 + time2);
+    //     }
+    // }
+
+    // switchMic() {
+    //     if (this.micSwitch) {
+    //         this.mic.mute();
+    //         this.micSwitch = false;
+    //     } else {
+    //         this.micSwitch = true;
+    //         this.mic.unmute();
+    //         if (!this.queue.isEmpty()) {
+    //             if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
+    //                 this.queue.dequeue();
+    //                 this.heartbeat = this.iterator;
+    //                 this.playAlert();
+    //             } else {
+    //                 this.queue.dequeue();
+    //             }
+
+    //         }
+
+    //     }
+    // }
+
+    // switchSpeaker() {
+    //     if (this.speakerSwitch) {
+    //         this.song.stop();
+    //         this.speakerSwitch = false;
+    //     } else {
+    //         this.speakerSwitch = true;
+
+    //     }
+    // }
+
+    playSonic() {
         if (!this.killSwitch) { // switch for killing this loop
 
-            this.switchSpeaker();
-            this.switchF("Send");
-            console.log("Status : Send")
-            this.sendFstop = setTimeout(() => {
-                this.switchSpeaker();
-                this.switchMic();
-                console.log("Status : Receive", this.iterator)
-                this.switchF("Receive");
-            }, time1);
-
-            this.receiveFstop = setTimeout(() => {
-                this.switchMic();
-                this.iterator += 1;
-                this.lastRandom = this.randomRecurse();
-                this.callTimeout(time1, this.lastRandom);
-            }, time1 + time2);
-        }
-    }
-
-    switchMic() {
-        if (this.micSwitch) {
-            this.mic.stop();
-            this.micSwitch = false;
-        } else {
-            this.micSwitch = true;
-            this.mic.start();
-            if (!this.queue.isEmpty()) {
-                if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
-                    this.queue.dequeue();
-                    this.heartbeat = this.iterator;
-                    this.playAlert();
-                } else {
-                    this.queue.dequeue();
-                }
-
-            }
-
-        }
-    }
-
-    switchSpeaker() {
-        if (this.speakerSwitch) {
-            this.song.stop();
-            this.speakerSwitch = false;
-        } else {
-            this.speakerSwitch = true;
             if (this.songBuffer) {
+                this.mic.stop();
+                this.iamstopped = true;
+                muter.textContent = "Supposed to be muted"
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
-                this.song.loop = false
+                this.song.loop = false;
                 this.song.connect(this.audioContext.destination);
                 this.song.start();
+                statusElem.textContent = "Status : Send"
+                this.switchF("Send");
+                this.songPlay = true;
+                this.song.onended = () => {
+                    this.songPlay = false;
+                    statusElem.textContent = "Status : Receive"
+                    this.switchF("Receive");
+                    this.mic.start(() => {
+                        this.iamstopped = false;
+                        muter.textContent = "SUp boi"
+
+                        if (!this.queue.isEmpty()) {
+                            if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
+                                this.queue.dequeue();
+                                this.heartbeat = this.iterator;
+                                this.playAlert();
+                            } else {
+                                this.queue.dequeue();
+                            }
+
+                        }
+                        var newRandom = this.randomRecurse();
+                        this.lastRandom = newRandom
+                        this.receiveFstop = setTimeout(() => {
+                            this.iterator += 1;
+                            this.playSonic();
+                        }, newRandom);
+                    });
+                }
             } else {
-                throw 'Ultra sonic waves'
+                throw 'Initialization error'
             }
         }
+
     }
 
     playAlert() {
@@ -310,14 +365,14 @@ export default class Analyzer {
 
     forceShedule(time1) {
         if (this.receiveFstop) {
-            clearTimeout(this.sendFstop);
+            if (this.songPlay) {
+                this.song.stop()
+            }
             clearTimeout(this.receiveFstop);
-            this.speakerSwitch = false;
-            this.micSwitch = false;
-            this.mic.stop();
+            this.iterator += 1;
         }
         if (!this.killSwitch) {
-            this.callTimeout(time1, Util.getRndInteger(2, 7) * 200);
+            this.playSonic();
         }
     }
 
