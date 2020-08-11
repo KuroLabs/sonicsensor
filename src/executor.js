@@ -25,12 +25,32 @@ export default class Analyzer {
         this.alertBuffer = null;
         this.freqRanges = null;
         this.masterCache = {};
+        this.lastForceSchedule=null;
+    }
 
+    vibrate(high=false){
+        if (navigator.vibrate) {
+            if(high){
+                 navigator.vibrate(300);
+            }else{
+                navigator.vibrate(100);
+            }
+        }
+    }
+
+    stopCycle() {
+        return this.collector;
     }
 
     async init(notify, switchF) {
         this.notify = notify;
         this.switchF = switchF;
+                // enable vibration support
+        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+
+        if(!navigator.vibrate){
+            console.error("Vibration API not supported");
+        };
         // encoding setup - record and store buffer
         this.sonic = new Sonic(this.config);
 
@@ -63,14 +83,12 @@ export default class Analyzer {
 
 
     setup() {
-        let cnv = this.p5.createCanvas(600, 600);
+        // let cnv = this.p5.createCanvas(600, 600);
         this.p5.noLoop();
     }
 
     start() {
         this.killSwitch = false
-        this.successStack = []
-        this.successCount = 0
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
         this.mic.start(() => {
@@ -85,9 +103,9 @@ export default class Analyzer {
 
             const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
             // SETUP FFT lGRAPH
-            this.p5.background(0);
-            this.p5.noStroke();
-            this.p5.fill(240, 150, 150);
+            // this.p5.background(0);
+            // this.p5.noStroke();
+            // this.p5.fill(240, 150, 150);
             var spectrum = [];
             if (!this.iamstopped) {
                 spectrum = this.fft.analyze();
@@ -101,12 +119,12 @@ export default class Analyzer {
 
             //CRITICAL
             //DRAW PEAKS
-            for (let i = 0; i < spectrum.length; i++) {
-                let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
-                let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
-                this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
-            }
-            this.p5.endShape();
+            // for (let i = 0; i < spectrum.length; i++) {
+            //     let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
+            //     let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
+            //     this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
+            // }
+            // this.p5.endShape();
 
 
             // DECODE---------------
@@ -163,18 +181,25 @@ export default class Analyzer {
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
                                     console.log(`Energy :` + reqEnergy.join('*-*'))
 
-                                    let success = reqEnergy.filter(x => x > 130).length >= Math.ceil(this.payload.length / 2)
+                                    let success = reqEnergy.filter(x => x > 83).length >= Math.ceil(this.payload.length / 2)
                                     document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
+                                        
+                                        if(this.lastForceSchedule && this.iterator+1 -this.lastForceSchedule<=2){
+                                           this.vibrate(true);
+                                        }else{
+                                            this.vibrate(false);
+                                        }
+
                                         this.queue.enqueue(1);
                                         document.querySelector("h1").innerHTML = "Enqued : " + this.queue.length()
                                         console.warn("[DEBUG] payload: ", this.payload);
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
                                         this.payload = ""
-                                        this.forceShedule(500); //hardcoded
+                                        this.forceShedule(500, Math.max(...reqEnergy)); //hardcoded
                                     }
                                 }
                                 if (decodedChar == "$") {
@@ -192,25 +217,10 @@ export default class Analyzer {
 
     stop() {
         this.queue.empty();
-        this.successStack = []
-        this.successCount = 0
         this.killSwitch = true
         this.mic.stop()
     }
 
-    testSuccess(success) {
-        this.successStack.push(success)
-        this.successCount += (success ? 1 : 0)
-        if (this.successStack.length < 3) {
-            return success
-        } else {
-            if (this.successStack.length > 3) {
-                this.successCount -= (this.successStack[0] ? 1 : 0)
-                this.successStack = this.successStack.slice(1)
-            }
-            return (this.successCount > 1)
-        }
-    }
 
     getFreqRanges() {
         const {
@@ -309,7 +319,6 @@ export default class Analyzer {
             if (this.songBuffer) {
                 this.mic.stop();
                 this.iamstopped = true;
-                muter.textContent = "Supposed to be muted"
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
                 this.song.loop = false;
@@ -319,30 +328,34 @@ export default class Analyzer {
                 this.switchF("Send");
                 this.songPlay = true;
                 this.song.onended = () => {
-                    this.songPlay = false;
-                    statusElem.textContent = "Status : Receive"
-                    this.switchF("Receive");
-                    this.mic.start(() => {
-                        this.iamstopped = false;
-                        muter.textContent = "SUp boi"
+                    setTimeout(() => {
+                        this.songPlay = false;
 
-                        if (!this.queue.isEmpty()) {
-                            if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
-                                this.queue.dequeue();
-                                this.heartbeat = this.iterator;
-                                this.playAlert();
-                            } else {
-                                this.queue.dequeue();
+                        statusElem.textContent = "Status : Receive"
+                        this.switchF("Receive");
+                        this.mic.start(() => {
+                            this.iamstopped = false;
+
+
+                            if (!this.queue.isEmpty()) {
+                                if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
+                                    this.queue.dequeue();
+                                    this.heartbeat = this.iterator;
+                                    this.playAlert();
+                                } else {
+                                    this.queue.dequeue();
+                                }
+
                             }
+                            var newRandom = this.randomRecurse();
+                            this.lastRandom = newRandom
+                            this.receiveFstop = setTimeout(() => {
+                                this.iterator += 1;
+                                this.playSonic();
+                            }, newRandom);
+                        });
+                    }, 100)
 
-                        }
-                        var newRandom = this.randomRecurse();
-                        this.lastRandom = newRandom
-                        this.receiveFstop = setTimeout(() => {
-                            this.iterator += 1;
-                            this.playSonic();
-                        }, newRandom);
-                    });
                 }
             } else {
                 throw 'Initialization error'
@@ -363,13 +376,15 @@ export default class Analyzer {
         }
     }
 
-    forceShedule(time1) {
+    forceShedule(time1, energy) {
         if (this.receiveFstop) {
             if (this.songPlay) {
                 this.song.stop()
             }
             clearTimeout(this.receiveFstop);
+       
             this.iterator += 1;
+            this.lastForceSchedule=this.iterator;
         }
         if (!this.killSwitch) {
             this.playSonic();

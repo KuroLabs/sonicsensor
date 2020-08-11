@@ -4,6 +4,8 @@ import Analyzer from './src/executor.js';
 
 let worker = new Worker("./worker.js");
 
+
+
 function bootstrap(p) {
     let config = {
         alphabet: '^ABC123$',
@@ -37,6 +39,10 @@ function bootstrap(p) {
 
     p.draw = () => {
         analyzer.draw();
+    }
+
+    stopCycle.onclick = function () {
+        console.save(analyzer.stopCycle());
     }
 
     // worker.addEventListener("message", (e) => {
