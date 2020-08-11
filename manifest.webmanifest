@@ -1,7 +1,8 @@
 {
-    "name": "Sonic-Sensor",
-    "short_name": "Sonic-Sensor",
-    "start_url": ".",
+    "name": "sonic-sensor",
+    "short_name": "sonic-sensor",
+    "start_url": "./",
     "display": "standalone",
-    "background_color": "#fff"
+    "background_color": "#fff",
+    "theme_color": "#1c1b33"
 }

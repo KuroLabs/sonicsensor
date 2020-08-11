@@ -13,6 +13,7 @@ export default class Analyzer {
         this.speakerSwitch = false;
         this.killSwitch = false;
         this.receiveFstop = null;
+        this.sendFstop = null;
         this.heartbeat = null;
         this.lastRandom = 900;
         // Decoded String
@@ -24,12 +25,32 @@ export default class Analyzer {
         this.alertBuffer = null;
         this.freqRanges = null;
         this.masterCache = {};
+        this.lastForceSchedule = null;
+    }
 
+    vibrate(high = false) {
+        if (navigator.vibrate) {
+            if (high) {
+                navigator.vibrate(300);
+            } else {
+                navigator.vibrate(100);
+            }
+        }
+    }
+
+    stopCycle() {
+        return this.collector;
     }
 
     async init(notify, switchF) {
         this.notify = notify;
         this.switchF = switchF;
+        // enable vibration support
+        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+
+        if (!navigator.vibrate) {
+            console.error("[ERR] Vibration API not supported");
+        };
         // encoding setup - record and store buffer
         this.sonic = new Sonic(this.config);
 
@@ -37,24 +58,32 @@ export default class Analyzer {
         audioBuffer.startRendering();
         audioBuffer.oncomplete = (e) => {
             this.songBuffer = e.renderedBuffer;
+            window.songBuffer = this.songBuffer;
         }
 
         // decode setup
         this.freqRanges = this.getFreqRanges();
         this.audioContext = new window.AudioContext;
         this.p5.getAudioContext().resume();
-        this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
-        console.log(this.alertBuffer)
+        // this.alertBuffer = await Util.loadSound(this.audioContext, "/assets/snapnotify.mp3");
+        this.alertAudio = new Audio();
+        let src1 = document.createElement("source");
+        src1.type = "audio/mpeg";
+        src1.src = "/assets/snapnotify.mp3";
+        this.alertAudio.appendChild(src1);
         // p5 
         this.mic = new p5.AudioIn();
+        console.log("[INFO] Mic: ", this.mic);
         this.fft = new p5.FFT();
         this.fft.setInput(this.mic);
         this.started = true;
+
+        this.p5.loop();
     }
 
 
     setup() {
-        // let cnv = this.p5.createCanvas(1200, 600);
+        // let cnv = this.p5.createCanvas(600, 600);
         this.p5.noLoop();
     }
 
@@ -62,30 +91,27 @@ export default class Analyzer {
         this.killSwitch = false
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
-        this.callTimeout(songDuration, 900);
-        // this.switchMic()
+        this.mic.start(() => {
+            this.playSonic();
+        });
         // this.switchSpeaker()
+    }
+
+    stop() {
+        this.queue.empty();
+        this.killSwitch = true;
+        this.mic.stop();
     }
 
     draw() {
         if (this.started) {
 
-
             const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
-            // SETUP FFT lGRAPH
-            // this.p5.background(0);
-            // this.p5.noStroke();
-            // this.p5.fill(240, 150, 150);
-            let spectrum = this.fft.analyze();
-            //CRITICAL
-            //DRAW PEAKS
-            // for (let i = 0; i < spectrum.length; i++) {
-            //     let x = this.p5.map(i, 0, spectrum.length, 0, this.p5.width);
-            //     let h = -this.p5.height + this.p5.map(spectrum[i], 0, 255, this.p5.height, 0);
-            //     this.p5.rect(x, this.p5.height, this.p5.width / spectrum.length, h)
-            // }
-            // this.p5.endShape();
 
+            var spectrum = [];
+            if (!this.iamstopped) {
+                spectrum = this.fft.analyze();
+            }
 
             // DECODE---------------
             let testEnergyArr = this.freqRanges.map((x) => {
@@ -101,20 +127,13 @@ export default class Analyzer {
             //DECODE CHAR PROCESS
             if (maxx > threshold) {
 
-
                 let f = Util.indexToFreq(this.p5.sampleRate(), index, spectrum);
 
-
-
                 if (freqMin - f < freqError && f <= freqMax) {
-
-                    //DEBUG ************
-                    //DEBUG ************
 
                     let decodedChar = this.sonic.freqToChar(f);
 
                     let energy = testEnergyArr[alphabet.indexOf(decodedChar)]
-
 
                     if (energy <= 160 && energy >= 70) {
                         if (decodedChar in this.masterCache) {
@@ -126,29 +145,40 @@ export default class Analyzer {
                             this.masterCache[decodedChar]['count'] = 1
                         }
 
-                        if (this.masterCache[decodedChar]['count'] >= 10) {
+                        if (this.masterCache[decodedChar]['count'] >= 2) {
 
 
                             // Monitors for payload
                             if (decodedChar == "^") {
                                 this.payload = "^";
                             } else if (decodedChar == "$" || this.payload.length == 0 || this.payload.slice(-1) != decodedChar) {
-                                this.payload += decodedChar; ``
+                                this.payload += decodedChar;
+                                console.log(Util.minOperations("^" + data + "$", this.payload));
                                 if (Util.minOperations("^" + data + "$", this.payload) >= 0.6) {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
+
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
-                                    let success = reqEnergy.filter(x => x > this.config.energyFilter).length >= Math.ceil(this.payload.length / 2)
+                                    console.log(`[DEBUG] Energy :` + reqEnergy.join('*-*'))
+
+                                    let success = reqEnergy.filter(x => x > 83).length >= Math.ceil(this.payload.length / 2)
                                     document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
+
+                                        if (this.lastForceSchedule && this.iterator + 1 - this.lastForceSchedule <= 2) {
+                                            this.vibrate(true);
+                                        } else {
+                                            this.vibrate(false);
+                                        }
+
                                         this.queue.enqueue(1);
                                         document.querySelector("h1").innerHTML = "Enqued : " + this.queue.length()
                                         console.warn("[DEBUG] payload: ", this.payload);
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
                                         this.payload = ""
-                                        this.forceShedule(500); //hardcoded
+                                        this.forceShedule(500, Math.max(...reqEnergy)); //hardcoded
                                     }
                                 }
                                 if (decodedChar == "$") {
@@ -164,11 +194,6 @@ export default class Analyzer {
         }
     }
 
-    stop() {
-        this.queue.empty();
-        this.killSwitch = true
-        this.mic.stop()
-    }
 
     getFreqRanges() {
         const {
@@ -206,87 +231,74 @@ export default class Analyzer {
         return this.randomRecurse();
     }
 
-    callTimeout(time1, time2) {
+    playSonic() {
         if (!this.killSwitch) { // switch for killing this loop
 
-            this.switchSpeaker();
-            this.switchF("Send");
-            console.log("Status : Send")
-            setTimeout(() => {
-                this.switchSpeaker();
-                this.switchMic();
-                console.log("Status : Receive")
-                this.switchF("Receive");
-            }, time1);
-
-            this.receiveFstop = setTimeout(() => {
-                this.switchMic();
-                this.iterator += 1;
-                this.lastRandom = this.randomRecurse();
-                this.callTimeout(time1, this.lastRandom);
-            }, time1 + time2);
-        }
-    }
-
-    switchMic() {
-        if (this.micSwitch) {
-            this.mic.stop();
-            this.micSwitch = false;
-        } else {
-            this.micSwitch = true;
-            this.mic.start();
-            if (!this.queue.isEmpty()) {
-                if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
-                    this.queue.dequeue();
-                    this.heartbeat = this.iterator;
-                    this.playAlert();
-                } else {
-                    this.queue.dequeue();
-                }
-
-            }
-
-        }
-    }
-
-    switchSpeaker() {
-        if (this.speakerSwitch) {
-            this.song.stop();
-            this.speakerSwitch = false;
-        } else {
-            this.speakerSwitch = true;
             if (this.songBuffer) {
+                this.mic.stop();
+                this.iamstopped = true;
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
-                this.song.loop = false
+                this.song.loop = false;
                 this.song.connect(this.audioContext.destination);
                 this.song.start();
+                this.switchF("Send");
+                this.songPlay = true;
+                this.song.onended = () => {
+                    setTimeout(() => {
+                        this.songPlay = false;
+
+                        this.switchF("Receive");
+                        this.mic.start(() => {
+                            this.iamstopped = false;
+
+                            if (!this.queue.isEmpty()) {
+                                if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
+                                    this.queue.dequeue();
+                                    this.heartbeat = this.iterator;
+                                    this.playAlert();
+                                } else {
+                                    this.queue.dequeue();
+                                }
+
+                            }
+                            var newRandom = this.randomRecurse();
+                            this.lastRandom = newRandom
+                            this.receiveFstop = setTimeout(() => {
+                                this.iterator += 1;
+                                this.mic.stop();
+                                this.playSonic();
+                            }, newRandom);
+                        });
+                    }, 100)
+
+                }
             } else {
-                throw 'Ultra sonic waves'
+                throw 'Initialization error'
             }
         }
     }
 
     playAlert() {
-        if (this.alertBuffer) {
-            const alertSource = this.audioContext.createBufferSource();
-            alertSource.buffer = this.alertBuffer;
-            alertSource.connect(this.audioContext.destination);
-            alertSource.start();
+        if (this.alertAudio) {
+            this.alertAudio.play()
         } else {
             throw "Alert sound not loaded"
         }
     }
 
-    forceShedule(time1) {
+    forceShedule(time1, energy) {
         if (this.receiveFstop) {
+            if (this.songPlay) {
+                this.song.stop()
+            }
             clearTimeout(this.receiveFstop);
-            this.switchMic();
+
+            this.iterator += 1;
+            this.lastForceSchedule = this.iterator;
         }
         if (!this.killSwitch) {
-            this.callTimeout(time1, Util.getRndInteger(3, 6) * 200);
+            this.playSonic();
         }
     }
-
-
 }

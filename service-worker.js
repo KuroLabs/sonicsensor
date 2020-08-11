@@ -1,12 +1,33 @@
-const CACHE_NAME = "cache-v1";
+const CACHE_NAME = "cache-v2";
 const CACHE_FILES = [
     '/',
     '/index.html',
-    '/manifest.webmanifest',
+    '/assets/anime.json',
+    '/assets/listen.json',
+    '/assets/snapnotify.mp3',
+    '/assets/thunder.png',
+    '/css/AvenirNextLTPro-Bold.otf',
+    '/css/AvenirNextLTPro-It.otf',
+    '/css/AvenirNextLTPro-Regular.otf',
+    '/css/bootstrap.min.css',
+    '/css/GeorginademoRegular-gxxyE.ttf',
+    '/css/MYRIADPRO-BOLD.OTF',
+    '/css/Sectar-Rpq3e.otf',
+    '/css/style.css',
+    '/vendor/bootstrap.min.js',
+    '/vendor/fontawesome-all.min.js',
+    '/vendor/jquery-3.4.1.min.js',
+    '/vendor/lottie-player.js',
+    '/vendor/noSleep.js',
     '/vendor/p5.js',
     '/vendor/p5.sound.js',
+    '/vendor/sonic.js',
+    '/vendor/TimelineMax.min.js',
+    '/vendor/TweenMax.min.js',
+    '/vendor/jquery.pagepiling.min.js',
+    '/vendor/jquery.pagepiling.min.css',
     '/dist/sonicsensor.min.js',
-    '/assets/snapnotify.mp3',
+    '/manifest.webmanifest',
 ];
 
 self.addEventListener('install', function (event) {
