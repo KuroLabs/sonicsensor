@@ -1,4 +1,4 @@
-class Sonic{
+class Sonic {
     constructor(config) {
         let params = config || {};
         this.freqMin = params.freqMin || 18500;
@@ -6,7 +6,7 @@ class Sonic{
         this.freqError = params.freqError || 50;
         this.alphabet = params.alphabet || "^ABC123$"; //MUST INCLUDE startChar AND endChar
         this.startChar = this.alphabet[0];
-        this.endChar = this.alphabet[this.alphabet.length-1];
+        this.endChar = this.alphabet[this.alphabet.length - 1];
         this.freqRange = this.freqMax - this.freqMin
         this.rampDuration = params.rampDuration || 0.07;
         this.charDuration = params.charDuration || 0.2;
@@ -19,7 +19,7 @@ class Sonic{
         let input = this.startChar + this.data + this.endChar;
         // console.log(input+" "+this.charDuration+" "+this.rampDuration)
         // OfflineAudioContext for Buffer.
-        const offlineCtx = new window.OfflineAudioContext(1 ,input.length * this.charDuration * 48000 ,48000 );
+        const offlineCtx = new window.OfflineAudioContext(2, input.length * this.charDuration * 48000, 48000);
 
         // Use WAAPI to schedule the frequencies.
         for (let i = 0; i < input.length; i++) {
@@ -48,15 +48,15 @@ class Sonic{
         gainNode.gain.linearRampToValueAtTime(0.9, startTime + this.rampDuration); //change gain here
         gainNode.gain.setValueAtTime(0.9, startTime + duration - this.rampDuration);
         gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
-    
+
         gainNode.connect(offlineCtx.destination);
-    
+
         let osc = offlineCtx.createOscillator();
         osc.frequency.value = freq;
         osc.connect(gainNode);
-    
+
         osc.start(startTime);
-        osc.stop(startTime + duration)        
+        osc.stop(startTime + duration)
 
     }
 
@@ -78,7 +78,7 @@ class Sonic{
         // If the frequency is out of the range.
         if (!(this.freqMin <= freq && freq <= this.freqMax)) {
             // If it's close enough to the min, clamp it (and same for max).
-            if ( freq < this.freqMin && (this.freqMin - freq) < this.freqError) {
+            if (freq < this.freqMin && (this.freqMin - freq) < this.freqError) {
                 freq = this.freqMin;
             } else if (freq > this.freqMax && (freq - this.freqMax) < this.freqError) {
                 freq = this.freqMax;
@@ -92,6 +92,6 @@ class Sonic{
         // Convert frequency to index to char.
         let percent = (freq - this.freqMin) / this.freqRange;
         let index = Math.round(this.alphabet.length * percent);
-        return this.alphabet[index];        
+        return this.alphabet[index];
     }
 }

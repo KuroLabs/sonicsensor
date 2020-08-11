@@ -15,8 +15,12 @@
     <button id="startButton">start</button>
     <button id="stopButton">stop</button>
     <p id="debugfreq" style="font-size: 3rem;font-weight: 900;"></p>
+    <button id="play">play</button>
+    <audio id="sl" src="./sonic.wav" loop></audio>
 
     <!-- MOBILE DEBUGGING -->
+
+
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>
         eruda.init();
@@ -32,10 +36,12 @@
     <script src="test.js"></script>
 
     <script>
-        var heartBeat = 0;
-        var vibrateInterval;
+        play.onclick = function () {
+            console.log(sl)
+            sl.play();
+        }
 
-        
+
     </script>
 </body>
 

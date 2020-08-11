@@ -6418,7 +6418,7 @@
         var constraints = {
           audio: {
             sampleRate: master.audiocontext.sampleRate,
-            echoCancellation: false
+            echoCancellation: true
           }
         };
 
@@ -6427,6 +6427,7 @@
         }
 
         window.navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+          console.log(stream);
           self.stream = stream;
           self.enabled = true;
 

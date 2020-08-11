@@ -22,7 +22,7 @@ class Analyzer {
 
     }
 
-    init(notify,switchF) {
+    init(notify, switchF) {
         this.notify = notify;
         this.switchF = switchF;
         // encoding setup - record and store buffer
@@ -48,7 +48,7 @@ class Analyzer {
 
     setup() {
         // CANVAS SETUP
-        // let cnv = createCanvas(1200, 600);
+        let cnv = createCanvas(1200, 600);
         //DECODER SETUP
         // this.coder = new SonicCoder(this.config);
         noLoop();
@@ -58,28 +58,28 @@ class Analyzer {
         this.killSwitch = false
         let songDuration = (this.config.charDuration) * 1000 * (this.config.data.length + 2) + 50
         console.log(songDuration)
-        this.callTimeout(songDuration,900);
-        // this.switchMic()
+        // this.callTimeout(songDuration, 900);
+        this.switchMic()
         // this.switchSpeaker()
     }
 
     draw() {
 
-        const {freqMin, freqMax, freqError, threshold, alphabet, data} = this.config;
+        const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
 
         if (this.started) {
             //SETUP FFT GRAPH
-            // background(0);
-            // noStroke();
-            // fill(240, 150, 150);
+            background(0);
+            noStroke();
+            fill(240, 150, 150);
             let spectrum = this.fft.analyze(); //CRITICAL
             //DRAW PEAKS
-            // for (let i = 0; i < spectrum.length; i++) {
-            //     let x = map(i, 0, spectrum.length, 0, width);
-            //     let h = -height + map(spectrum[i], 0, 255, height, 0);
-            //     rect(x, height, width / spectrum.length, h)
-            // }
-            // endShape();
+            for (let i = 0; i < spectrum.length; i++) {
+                let x = map(i, 0, spectrum.length, 0, width);
+                let h = -height + map(spectrum[i], 0, 255, height, 0);
+                rect(x, height, width / spectrum.length, h)
+            }
+            endShape();
 
 
             // DECODE---------------
@@ -124,7 +124,7 @@ class Analyzer {
                                     console.log("[DEBUG] masterCache - BEFORE: ", this.masterCache)
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
                                     let success = reqEnergy.filter(x => x > 100).length >= Math.ceil(this.payload.length / 2)
-                                    this.notify(this.payload,Math.max(...reqEnergy),success);
+                                    this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
 
                                         console.warn("[DEBUG] payload: ", this.payload);
@@ -133,12 +133,12 @@ class Analyzer {
                                         this.payload = ""
                                         this.forceShedule(500); //hardcoded
                                     }
-                                }       
+                                }
                                 if (decodedChar == "$") {
                                     this.payload = ""
-                                }                         
+                                }
                             }
-                            
+
                         }
                     }
                 }
