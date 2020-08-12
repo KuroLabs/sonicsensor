@@ -10,8 +10,8 @@ function bootstrap(p) {
     let config = {
         alphabet: '^ABC123$',
         data: 'B',
-        charDuration: 0.15,
-        rampDuration: 0.06,
+        charDuration: 0.1,
+        rampDuration: 0.04,
         freqMin: 18500,
         freqMax: 19000,
         freqError: 50,

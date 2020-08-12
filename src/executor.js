@@ -25,14 +25,14 @@ export default class Analyzer {
         this.alertBuffer = null;
         this.freqRanges = null;
         this.masterCache = {};
-        this.lastForceSchedule=null;
+        this.lastForceSchedule = null;
     }
 
-    vibrate(high=false){
+    vibrate(high = false) {
         if (navigator.vibrate) {
-            if(high){
-                 navigator.vibrate(300);
-            }else{
+            if (high) {
+                navigator.vibrate(300);
+            } else {
                 navigator.vibrate(100);
             }
         }
@@ -45,10 +45,10 @@ export default class Analyzer {
     async init(notify, switchF) {
         this.notify = notify;
         this.switchF = switchF;
-                // enable vibration support
+        // enable vibration support
         navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
-        if(!navigator.vibrate){
+        if (!navigator.vibrate) {
             console.error("Vibration API not supported");
         };
         // encoding setup - record and store buffer
@@ -78,6 +78,7 @@ export default class Analyzer {
         this.fft.setInput(this.mic);
         this.started = true;
 
+        this.setTime = null;
         this.p5.loop();
     }
 
@@ -186,10 +187,10 @@ export default class Analyzer {
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
-                                        
-                                        if(this.lastForceSchedule && this.iterator+1 -this.lastForceSchedule<=2){
-                                           this.vibrate(true);
-                                        }else{
+
+                                        if (this.lastForceSchedule && this.iterator + 1 - this.lastForceSchedule <= 2) {
+                                            this.vibrate(true);
+                                        } else {
                                             this.vibrate(false);
                                         }
 
@@ -319,6 +320,10 @@ export default class Analyzer {
             if (this.songBuffer) {
                 this.mic.stop();
                 this.iamstopped = true;
+                if (this.setTime && (this.iterator + 1 - this.lastForceSchedule) > 2) {
+                    console.log("waited two cycles")
+                    this.setTime = null;
+                }
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
                 this.song.loop = false;
@@ -335,8 +340,6 @@ export default class Analyzer {
                         this.switchF("Receive");
                         this.mic.start(() => {
                             this.iamstopped = false;
-
-
                             if (!this.queue.isEmpty()) {
                                 if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
                                     this.queue.dequeue();
@@ -348,11 +351,12 @@ export default class Analyzer {
 
                             }
                             var newRandom = this.randomRecurse();
-                            this.lastRandom = newRandom
+                            this.lastRandom = newRandom;
+                            console.log(this.setTime || newRandom, "lol")
                             this.receiveFstop = setTimeout(() => {
                                 this.iterator += 1;
                                 this.playSonic();
-                            }, newRandom);
+                            }, this.setTime || newRandom);
                         });
                     }, 100)
 
@@ -382,9 +386,9 @@ export default class Analyzer {
                 this.song.stop()
             }
             clearTimeout(this.receiveFstop);
-       
+            this.setTime = 500;
             this.iterator += 1;
-            this.lastForceSchedule=this.iterator;
+            this.lastForceSchedule = this.iterator;
         }
         if (!this.killSwitch) {
             this.playSonic();
