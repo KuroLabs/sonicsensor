@@ -223,6 +223,10 @@ export default class Analyzer {
             if (this.songBuffer) {
                 this.mic.stop();
                 this.iamstopped = true;
+                if (this.setTime && (this.iterator + 1 - this.lastForceSchedule) > 2) {
+                    console.log("waited two cycles")
+                    this.setTime = null;
+                }
                 this.song = this.audioContext.createBufferSource();
                 this.song.buffer = this.songBuffer;
                 this.song.loop = false;
@@ -256,7 +260,7 @@ export default class Analyzer {
                                 this.playSonic();
                             }, newRandom);
                         });
-                    }, 100)
+                    }, 50)
 
                 }
             } else {
@@ -285,13 +289,13 @@ export default class Analyzer {
         }
     }
 
-    forceShedule(time1, energy) {
+    forceShedule() {
         if (this.receiveFstop) {
             if (this.songPlay) {
                 this.song.stop()
             }
             clearTimeout(this.receiveFstop);
-
+            this.setTime = 500;
             this.iterator += 1;
             this.lastForceSchedule = this.iterator;
         }
