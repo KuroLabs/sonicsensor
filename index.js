@@ -31,7 +31,9 @@ function bootstrap(p) {
         }).join(";");
         sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
     };
-
+    var bolt;
+    var tween;
+    var queue = []
     $(document).ready(function () {
         $('#pagepiling').pagepiling({
             scrollingSpeed: 300,
@@ -39,17 +41,20 @@ function bootstrap(p) {
             keyboardScrolling: false,
         });
 
-
-        $('.bolt').each(function (e) {
-
-            var bolt = $(this),
-                div = $(this).children('div');
-
+        $('.bolt').each(function (e) {  
+            bolt = $(this)
+            console.log("b",bolt)
+            var div = $(this).children('div');
             bolt.addClass('animate');
 
-            var tween = new TimelineMax({
+            tween = new TimelineMax({
                 onComplete() {
                     bolt.removeClass('animate');
+                    if(queue.length != 0){
+                        queue.pop();
+                        bolt.addClass('animate')
+                        tween.restart()
+                    }
                 }
             }).set(div, {
                 rotation: 360
@@ -69,7 +74,7 @@ function bootstrap(p) {
             });
         })
     })
-
+    // console.log("bolt",bolt)
     let analyzer = new Analyzer(p, config);
 
     //ALERT CONFIG
@@ -102,11 +107,23 @@ function bootstrap(p) {
     function cb(params, energy, success) {
 
         console.log("[INFO] RECORDED", params, energy, success);
-
+        if(params == "true") {
+            addRule(".containblack::before", {
+                opacity: "0"
+            });
+            return
+        }
         //flash
-        bolt.addClass('animate');
-        tween.restart();
+        if(queue.length == 0){
+            queue.push(1)
+            bolt.addClass('animate');
+            tween.restart();
+        } else{
+            queue.push(1)
+        }
+        // bolt.addClass('animate');
         // Toggle screen
+        energy = Math.round(energy)
         if (energy > config.energyFilter) {
             addRule(".containblack::before", {
                 opacity: "1"
@@ -148,7 +165,6 @@ function bootstrap(p) {
 
     document.querySelector(".circle").onclick = async () => {
         await analyzer.init(cb, switchF)
-
         // css fr start-button
         document.querySelectorAll(".fonts-social").forEach((el) => {
             el.classList.add("darkcolor")

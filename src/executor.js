@@ -148,7 +148,6 @@ export default class Analyzer {
                                     console.log(`[DEBUG] Energy :` + reqEnergy.join('*-*'))
 
                                     let success = reqEnergy.filter(x => x > 83).length >= Math.ceil(this.payload.length / 2)
-                                    document.querySelector("h2").innerHTML = "Analysis" + JSON.stringify(this.masterCache);
 
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
                                     if (success) {
@@ -159,7 +158,6 @@ export default class Analyzer {
                                             this.alertUserVibrate(false);
                                         }
                                         this.queue.enqueue(1);
-                                        document.querySelector("h1").innerHTML = "Enqued : " + this.queue.length()
                                         console.warn("[DEBUG] payload: ", this.payload);
                                         console.warn("[DEBUG] masterCache: ", this.masterCache);
                                         this.masterCache = {};
@@ -225,6 +223,7 @@ export default class Analyzer {
                 this.iamstopped = true;
                 if (this.setTime && (this.iterator + 1 - this.lastForceSchedule) > 2) {
                     console.log("waited two cycles")
+                    this.notify("true")
                     this.setTime = null;
                 }
                 this.song = this.audioContext.createBufferSource();
