@@ -7,14 +7,11 @@ export default class Analyzer {
         this.p5 = p5;
         this.config = config;
         this.notify = null; //??
-        // switch mic on and off
-        this.micSwitch = false;
-        // switch speaker on and off
-        this.speakerSwitch = false;
         this.killSwitch = false;
         this.receiveFstop = null;
         this.sendFstop = null;
         this.heartbeat = null;
+        this.volumeOn = true;
         this.lastRandom = 900;
         // Decoded String
         this.payload = "";
@@ -28,16 +25,6 @@ export default class Analyzer {
         this.lastForceSchedule = null;
     }
 
-    vibrate(high = false) {
-        if (navigator.vibrate) {
-            if (high) {
-                navigator.vibrate(300);
-            } else {
-                navigator.vibrate(100);
-            }
-        }
-    }
-
     stopCycle() {
         return this.collector;
     }
@@ -45,12 +32,7 @@ export default class Analyzer {
     async init(notify, switchF) {
         this.notify = notify;
         this.switchF = switchF;
-        // enable vibration support
-        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
-        if (!navigator.vibrate) {
-            console.error("[ERR] Vibration API not supported");
-        };
         // encoding setup - record and store buffer
         this.sonic = new Sonic(this.config);
 
@@ -83,7 +65,6 @@ export default class Analyzer {
 
 
     setup() {
-        // let cnv = this.p5.createCanvas(600, 600);
         this.p5.noLoop();
     }
 
@@ -94,7 +75,6 @@ export default class Analyzer {
         this.mic.start(() => {
             this.playSonic();
         });
-        // this.switchSpeaker()
     }
 
     stop() {
@@ -106,7 +86,14 @@ export default class Analyzer {
     draw() {
         if (this.started) {
 
-            const { freqMin, freqMax, freqError, threshold, alphabet, data } = this.config;
+            const {
+                freqMin,
+                freqMax,
+                freqError,
+                threshold,
+                alphabet,
+                data
+            } = this.config;
 
             var spectrum = [];
             if (!this.iamstopped) {
@@ -167,11 +154,10 @@ export default class Analyzer {
                                     if (success) {
 
                                         if (this.lastForceSchedule && this.iterator + 1 - this.lastForceSchedule <= 2) {
-                                            this.vibrate(true);
+                                            this.alertUserVibrate(true);
                                         } else {
-                                            this.vibrate(false);
+                                            this.alertUserVibrate(false);
                                         }
-
                                         this.queue.enqueue(1);
                                         document.querySelector("h1").innerHTML = "Enqued : " + this.queue.length()
                                         console.warn("[DEBUG] payload: ", this.payload);
@@ -256,7 +242,7 @@ export default class Analyzer {
                                 if (this.heartbeat === null || this.iterator >= this.heartbeat + 2) {
                                     this.queue.dequeue();
                                     this.heartbeat = this.iterator;
-                                    this.playAlert();
+                                    this.alertUserAudio()
                                 } else {
                                     this.queue.dequeue();
                                 }
@@ -279,11 +265,23 @@ export default class Analyzer {
         }
     }
 
-    playAlert() {
-        if (this.alertAudio) {
-            this.alertAudio.play()
-        } else {
-            throw "Alert sound not loaded"
+    alertUserVibrate(vibratehigh = false) {
+        if (!this.volumeOn) {
+            if (vibratehigh) {
+                navigator.vibrate(300);
+            } else {
+                navigator.vibrate(100);
+            }
+        }
+    }
+
+    alertUserAudio() {
+        if (this.volumeOn) {
+            if (this.alertAudio) {
+                this.alertAudio.play()
+            } else {
+                throw "Alert sound not loaded"
+            }
         }
     }
 
@@ -300,5 +298,9 @@ export default class Analyzer {
         if (!this.killSwitch) {
             this.playSonic();
         }
+    }
+
+    setVolumeOn(volumeOn) {
+        this.volumeOn = volumeOn;
     }
 }

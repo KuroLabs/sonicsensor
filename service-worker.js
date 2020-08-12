@@ -4,6 +4,7 @@ const CACHE_FILES = [
     '/index.html',
     '/assets/anime.json',
     '/assets/listen.json',
+    '/assets/volume.json',
     '/assets/snapnotify.mp3',
     '/assets/thunder.png',
     '/css/AvenirNextLTPro-Bold.otf',

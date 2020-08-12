@@ -1,11 +1,11 @@
 import Analyzer from './src/executor.js';
 
 var listenJson;
-var gooJson;
 async function loadLottie() {
-    let listen = await fetch("./assets/listen.json")
+    let listen = await fetch("./assets/listen.json");
     listenJson = await listen.json();
 }
+
 
 function bootstrap(p) {
 
@@ -72,6 +72,33 @@ function bootstrap(p) {
 
     let analyzer = new Analyzer(p, config);
 
+    //ALERT CONFIG
+    var volumeOn = true;
+    let volumeLottie = document.querySelector("#volume-toggle").getLottie();
+    navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+
+    if (navigator.vibrate) {
+        document.querySelector("#volume-toggle").onclick = (e) => {
+            let mute = [0, 41];
+            let unmute = [41, 0];
+            if (volumeOn) {
+                volumeLottie.playSegments(mute, false);
+                volumeOn = false;
+            } else {
+                volumeLottie.playSegments(unmute, false);
+                volumeOn = true;
+            }
+            analyzer.setVolumeOn(volumeOn);
+        }
+    } else {
+        volumeLottie.goToAndStop(0, true);
+        analyzer.setVolumeOn(volumeOn);
+        document.querySelector("#volume-toggle").style.opacity = "0.4"
+        document.querySelector("#volume-toggle").onclick = function (params) {
+            console.error("[ERR] Vibration not supported")
+        }
+    }
+
     function cb(params, energy, success) {
 
         console.log("[INFO] RECORDED", params, energy, success);
@@ -105,6 +132,8 @@ function bootstrap(p) {
         }
     }
 
+
+
     p.setup = () => {
         analyzer.setup();
     }
@@ -119,7 +148,6 @@ function bootstrap(p) {
 
     document.querySelector(".circle").onclick = async () => {
         await analyzer.init(cb, switchF)
-        analyzer.start();
 
         // css fr start-button
         document.querySelectorAll(".fonts-social").forEach((el) => {
@@ -138,6 +166,7 @@ function bootstrap(p) {
                     document.querySelector("#activate").innerHTML =
                         "<lottie-player src='./assets/anime.json' speed='1' style='width: 300px; height: 300px;' autoplay> </lottie-player>";
                     setTimeout(() => {
+                        analyzer.start();
                         $.fn.pagepiling.moveSectionDown();
                         setTimeout(() => {
                             document.querySelector("#activate").innerHTML = "<div class='tooltip'><div class='wrapperIcon play-id'><i class='fas fa-play animateClick controllIcons'></i></div><div class='wrapperIcon stop-id'><i class='fas fa-stop controllIcons'></i></div></div><lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json' id='bear'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
@@ -145,7 +174,7 @@ function bootstrap(p) {
                             document.querySelector(".tooltip").addEventListener("click", function (e) {
                                 console.warn("[INFO] ACTIVATE: ", e.target)
                                 if (e.target.classList.contains("play-id") || e.target.classList.contains("fa-play")) {
-                                    document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
+                                    document.querySelector("#acttext").innerHTML = "Busy, sending and listening for sonic waves"
                                     if (toggleState == true) {
                                         return;
                                     }
