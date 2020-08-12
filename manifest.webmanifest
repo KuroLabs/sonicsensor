@@ -1,8 +1,22 @@
 {
-    "name": "sonic-sensor",
-    "short_name": "sonic-sensor",
+    "name": "Sonic Sensor",
+    "short_name": "Sonic Sensor",
     "start_url": "./",
     "display": "standalone",
-    "background_color": "#fff",
-    "theme_color": "#1c1b33"
+    "background_color": "black",
+    "theme_color": "#1c1b33",
+    "icons": [
+        {
+          "src": "assets/manifest-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable any"
+        },
+        {
+          "src": "assets/manifest-icon-512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "maskable any"
+        }
+      ]
 }
