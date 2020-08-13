@@ -188,7 +188,7 @@ function bootstrap(p) {
                         analyzer.start();
                         $.fn.pagepiling.moveSectionDown();
                         setTimeout(() => {
-                            document.querySelector("#activate").innerHTML = "<div class='tooltip'><div class='wrapperIcon play-id'><i class='fas fa-play animateClick controllIcons'></i></div><div class='wrapperIcon stop-id'><i class='fas fa-stop controllIcons'></i></div></div><lottie-player src='https://assets7.lottiefiles.com/packages/lf20_ydTi0b.json' id='bear'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
+                            document.querySelector("#activate").innerHTML = "<div class='tooltip'><div class='wrapperIcon play-id'><i class='fas fa-play animateClick controllIcons'></i></div><div class='wrapperIcon stop-id'><i class='fas fa-stop controllIcons'></i></div></div><lottie-player src='./assets/listen.json' id='bear'  background='transparent'  speed='1'  style='width: 300px; height: 300px;'  loop  autoplay></lottie-player>";
                             var toggleState = true;
                             document.querySelector(".tooltip").addEventListener("click", function (e) {
                                 console.warn("[INFO] ACTIVATE: ", e.target)
