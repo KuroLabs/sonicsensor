@@ -309,7 +309,6 @@ overflow-x: hidden;
 
 
   .bolt {
-    --bolt: rgb(242, 222, 16);
     width: 126px;
     height: 186px;
     position: relative;
@@ -320,7 +319,7 @@ overflow-x: hidden;
     stroke-width: 2;
     fill: none;
     stroke-linecap: round;
-    stroke: var(--bolt);
+    stroke: rgb(242, 222, 16);
   }
   
   .bolt svg.line {
@@ -392,7 +391,7 @@ overflow-x: hidden;
     display: block;
     width: 86px;
     height: 122px;
-    background: var(--bolt);
+    background: rgb(242, 222, 16);
     -webkit-clip-path: polygon(40% 0%, 100% 0, 65% 40%, 88% 40%, 8% 100%, 36% 50%, 0 50%);
             clip-path: polygon(40% 0%, 100% 0, 65% 40%, 88% 40%, 8% 100%, 36% 50%, 0 50%);
   }
