@@ -1,7 +1,8 @@
-const CACHE_NAME = "cache-v4";
+const CACHE_NAME = "cache-v6";
 const CACHE_FILES = [
     '/',
     '/index.html',
+    '/favicon.ico',
     '/assets/anime.json',
     '/assets/listen.json',
     '/assets/volume.json',
@@ -33,6 +34,8 @@ const CACHE_FILES = [
     '/assets/apple-icon-167.jpg',
     '/assets/apple-icon-152.jpg',
     '/assets/apple-icon-120.jpg',
+    '/assets/manifest-icon-192.png',
+    '/assets/manifest-icon-512.png',
     '/assets/apple-splash-2048-2732.jpg',
     '/assets/apple-splash-2732-2048.jpg',
     '/assets/apple-splash-1668-2388.jpg',
