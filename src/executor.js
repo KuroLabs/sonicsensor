@@ -219,7 +219,6 @@ export default class Analyzer {
         if (!this.killSwitch) { // switch for killing this loop
 
             if (this.songBuffer) {
-                this.mic.stop();
                 this.iamstopped = true;
                 if (this.setTime && (this.iterator + 1 - this.lastForceSchedule) > 2) {
                     console.log("waited two cycles")

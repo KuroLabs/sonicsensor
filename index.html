@@ -40,10 +40,12 @@
     <meta name="theme-color" content="#1c1b33">
     <link rel="manifest" href="./manifest.webmanifest">
     <!-- CSS -->
-    <link type="text/css" href="./vendor/jquery.pagepiling.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/animate.min.css" rel="stylesheet" >
+    <link type="text/css" href="./css/jquery.pagepiling.min.css" rel="stylesheet" />
     <link type="text/css" href="./css/bootstrap.min.css" rel="stylesheet">
     <link type="text/css" href="./css/style.css" rel="stylesheet">
     <script src="./vendor/lottie-player.js" type="text/javascript"></script>
+    <script src="./vendor/gif-player.es6.js" type="text/javascript"></script>
     <script src="./vendor/fontawesome-all.min.js" type="text/javascript"></script>
 
 </head>
@@ -111,7 +113,7 @@
 
                     <div class="d-flex align-items-center justify-content-center">
                         <h2 class="text fontPrimary" id="energyid" style="font-size: 3rem;"></h2>
-                        <div class="bolt" style="margin-left: 30px;margin-top: 40px;">
+                        <div class="bolt animate__animated animate__faster animate__bounce" style="margin-left: 30px;margin-top: 40px;">
                             <svg viewBox="0 0 170 57" class="white left">
                                 <path
                                     d="M36.2701759,17.9733192 C-0.981139498,45.4810755 -7.86361824,57.6618438 15.6227397,54.5156241 C50.8522766,49.7962945 201.109341,31.1461782 161.361488,2">
@@ -161,7 +163,7 @@
         eruda.init();
     </script> -->
     <!-- REGISTER SERVICE WORKER -->
-    <script>
+    <!-- <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -175,7 +177,7 @@
         } else {
             console.error('[INDEX] serviceWorker not supported');
         }
-    </script>
+    </script> -->
 
     <!-- UI -->
     <script src="./vendor/jquery-3.4.1.min.js" type="text/javascript"></script>

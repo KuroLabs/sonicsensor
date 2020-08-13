@@ -1,4 +1,5 @@
-const CACHE_NAME = "cache-v6";
+const CACHE_NAME = "cache-v11";
+console.log(CACHE_NAME);
 const CACHE_FILES = [
     '/',
     '/index.html',

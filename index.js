@@ -31,8 +31,8 @@ function bootstrap(p) {
         }).join(";");
         sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
     };
-    var bolt;
-    var tween;
+    // var bolt;
+    // var tween;
     var queue = []
     $(document).ready(function () {
         $('#pagepiling').pagepiling({
@@ -41,38 +41,38 @@ function bootstrap(p) {
             keyboardScrolling: false,
         });
 
-        $('.bolt').each(function (e) {  
-            bolt = $(this)
-            console.log("b",bolt)
-            var div = $(this).children('div');
-            bolt.addClass('animate');
+        // $('.bolt').each(function (e) {  
+        //     bolt = $(this)
+        //     console.log("b",bolt)
+        //     var div = $(this).children('div');
+        //     bolt.addClass('animate');
 
-            tween = new TimelineMax({
-                onComplete() {
-                    bolt.removeClass('animate');
-                    if(queue.length != 0){
-                        queue.pop();
-                        bolt.addClass('animate')
-                        tween.restart()
-                    }
-                }
-            }).set(div, {
-                rotation: 360
-            }).to(div, .7, {
-                y: 80,
-                rotation: 370
-            }).to(div, .6, {
-                y: -140,
-                rotation: 20
-            }).to(div, .1, {
-                rotation: -24,
-                y: 80
-            }).to(div, .8, {
-                ease: Back.easeOut.config(1.6),
-                rotation: 0,
-                y: 0
-            });
-        })
+        //     tween = new TimelineMax({
+        //         onComplete() {
+        //             bolt.removeClass('animate');
+        //             if(queue.length != 0){
+        //                 queue.pop();
+        //                 bolt.addClass('animate')
+        //                 tween.restart()
+        //             }
+        //         }
+        //     }).set(div, {
+        //         rotation: 360
+        //     }).to(div, .7, {
+        //         y: 80,
+        //         rotation: 370
+        //     }).to(div, .6, {
+        //         y: -140,
+        //         rotation: 20
+        //     }).to(div, .1, {
+        //         rotation: -24,
+        //         y: 80
+        //     }).to(div, .8, {
+        //         ease: Back.easeOut.config(1.6),
+        //         rotation: 0,
+        //         y: 0
+        //     });
+        // })
     })
     // console.log("bolt",bolt)
     let analyzer = new Analyzer(p, config);
@@ -113,14 +113,17 @@ function bootstrap(p) {
             });
             return
         }
+
         //flash
-        if(queue.length == 0){
-            queue.push(1)
-            bolt.addClass('animate');
-            tween.restart();
-        } else{
-            queue.push(1)
-        }
+        let bolt = document.querySelector(".bolt")
+        bolt.classList.toggle('animate__bounce');
+        // if(queue.length == 0){
+        //     queue.push(1)
+        //     // bolt.addClass('animate');
+        //     // tween.restart();
+        // } else{
+        //     queue.push(1)
+        // }
         // bolt.addClass('animate');
         // Toggle screen
         energy = Math.round(energy)
