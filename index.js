@@ -233,7 +233,7 @@ function bootstrap(p) {
                                 }
                             }
 
-                            document.querySelector("#acttext").innerHTML = "Busy, listening and sending sonic energy waves"
+                            document.querySelector("#acttext").innerHTML = "Busy, listening and sending ultrasonic waves"
                             document.querySelectorAll(".fonts-social")
                                 .forEach((el) => {
                                     el.classList
