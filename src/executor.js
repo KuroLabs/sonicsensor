@@ -148,12 +148,13 @@ export default class Analyzer {
                                     console.log(`[DEBUG] Energy :` + reqEnergy.join('*-*'))
 
                                     let success = reqEnergy.filter(x => x > 83).length >= Math.ceil(this.payload.length / 2)
-
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
+
                                     if (success) {
 
                                         if (this.lastForceSchedule && this.iterator + 1 - this.lastForceSchedule <= 2) {
                                             this.alertUserVibrate(true);
+                                            this.notify(this.payload, Math.max(...reqEnergy), success, "activateRed");
                                         } else {
                                             this.alertUserVibrate(false);
                                         }

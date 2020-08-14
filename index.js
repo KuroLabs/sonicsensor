@@ -104,13 +104,16 @@ function bootstrap(p) {
         }
     }
 
-    function cb(params, energy, success) {
+    function cb(params, energy, success, activate) {
 
         console.log("[INFO] RECORDED", params, energy, success);
-        if(params == "true") {
+        if (params == "true") {
             addRule(".containblack::before", {
                 opacity: "0"
             });
+            document.querySelector("#energyid").innerHTML = "";
+            document.querySelector("#energyalert").innerHTML = `Excellent! Keep up the distance.`
+
             return
         }
 
@@ -127,18 +130,18 @@ function bootstrap(p) {
         // bolt.addClass('animate');
         // Toggle screen
         energy = Math.round(energy)
-        if (energy > config.energyFilter) {
+        if (energy > config.energyFilter && activate) {
             addRule(".containblack::before", {
                 opacity: "1"
             });
             document.querySelector("#energyid").innerHTML = energy;
-            document.querySelector("#energyalert").innerHTML = `Energy greater than ${energy}. You are close to someone stepback.`
+            document.querySelector("#energyalert").innerHTML = `You are close to someone stepback.`
         } else {
             addRule(".containblack::before", {
                 opacity: "0"
             });
             document.querySelector("#energyid").innerHTML = energy;
-            document.querySelector("#energyalert").innerHTML = `Energy less than ${energy}. Excellent! Keep up the distance.`
+            document.querySelector("#energyalert").innerHTML = `Excellent! Keep up the distance.`
         }
     }
 
