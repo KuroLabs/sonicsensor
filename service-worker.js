@@ -1,14 +1,9 @@
-const CACHE_NAME = "cache-v11";
+const CACHE_NAME = "cache-v0";
 console.log(CACHE_NAME);
 const CACHE_FILES = [
     '/',
     '/index.html',
     '/favicon.ico',
-    '/assets/anime.json',
-    '/assets/listen.json',
-    '/assets/volume.json',
-    '/assets/snapnotify.mp3',
-    '/assets/thunder.png',
     '/css/AvenirNextLTPro-Bold.otf',
     '/css/AvenirNextLTPro-It.otf',
     '/css/AvenirNextLTPro-Regular.otf',
@@ -31,6 +26,12 @@ const CACHE_FILES = [
     '/vendor/jquery.pagepiling.min.css',
     '/dist/sonicsensor.min.js',
     '/manifest.webmanifest',
+    '/assets/anime.json',
+    '/assets/listen.json',
+    '/assets/bear.json',
+    '/assets/volume.json',
+    '/assets/snapnotify.mp3',
+    '/assets/thunder.png',
     '/assets/apple-icon-180.jpg',
     '/assets/apple-icon-167.jpg',
     '/assets/apple-icon-152.jpg',

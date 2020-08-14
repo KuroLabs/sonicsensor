@@ -122,7 +122,7 @@ export default class Analyzer {
 
                     let energy = testEnergyArr[alphabet.indexOf(decodedChar)]
 
-                    if (energy <= 160) {    // && energy >= 70
+                    if (energy <= 160 && energy >= 70) {
                         if (decodedChar in this.masterCache) {
                             this.masterCache[decodedChar]['energy'] = Math.max(energy, this.masterCache[decodedChar]['energy'])
                             this.masterCache[decodedChar]['count'] += 1
@@ -146,7 +146,7 @@ export default class Analyzer {
 
                                     let reqEnergy = Object.keys(this.masterCache).map(char => this.masterCache[char]['energy']);
                                     console.log(`[DEBUG] Energy :` + reqEnergy.join('*-*'))
-                                    let success = reqEnergy.filter(x => x > 30).length >= Math.ceil(this.payload.length / 2)
+                                    let success = reqEnergy.filter(x => x > 84).length >= Math.ceil(this.payload.length / 2)
                                     this.notify(this.payload, Math.max(...reqEnergy), success);
 
                                     if (success) {
