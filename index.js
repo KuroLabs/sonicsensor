@@ -141,7 +141,7 @@ function bootstrap(p) {
                 opacity: "0"
             });
             document.querySelector("#energyid").innerHTML = energy;
-            document.querySelector("#energyalert").innerHTML = `Excellent! Keep up the distance.`
+            document.querySelector("#energyalert").innerHTML = `Device detected in proximity.`
         }
     }
 

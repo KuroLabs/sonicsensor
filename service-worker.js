@@ -1,4 +1,4 @@
-const CACHE_NAME = "cache-v0";
+const CACHE_NAME = "cache-v7";
 console.log(CACHE_NAME);
 const CACHE_FILES = [
     '/',
