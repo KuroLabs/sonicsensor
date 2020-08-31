@@ -11,10 +11,14 @@
   <img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" />
   <br>
 </h1>
-<h4 align="center">A Javascript module to send data in ultrasonic sound programatically and decoding the data through a realtime fast fourier transform
+<h4 align="center">Javascript module to send data in ultrasonic sound programatically and decoding the data through a realtime fast fourier transform (Data through audio in the web)
 </h4>
 
-<a href='https://res.cloudinary.com/dqmbs2chk/video/upload/v1598886336/demo_obb9eg.mp4'> Checkout the demo </a>
+<a href='https://res.cloudinary.com/dqmbs2chk/video/upload/v1598886336/demo_obb9eg.mp4'> Checkout the demo video</a>
 
-Live demo 🚀 at https://sonic.surge.sh/proof/ - Keep your volume at full!
+Live demo 🚀 at https://sonic.surge.sh/proof/ - Keep your volume at full while trying
+
+Nearing completion :)
+
+
 
