@@ -8,8 +8,6 @@
   <br>
   <img src="https://img.shields.io/npm/l/stegcloak?style=plastic" />
   <a href="https://www.npmjs.com/package/stegcloak"> <img src="https://img.shields.io/npm/v/stegcloak?style=plastic" /> </a>
-  <img src="https://raw.githubusercontent.com/sindresorhus/awesome/main/media/badge.svg" />
-  </a>
   <img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" />
   <br>
 </h1>
@@ -18,5 +16,5 @@
 
 <a href='https://res.cloudinary.com/dqmbs2chk/video/upload/v1598886336/demo_obb9eg.mp4'> Checkout the demo </a>
 
-<p> Nearing completion </p>
+Live demo 🚀 at https://sonic.surge.sh/proof/ - Keep your volume at full!
 
