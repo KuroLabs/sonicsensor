@@ -1,11 +1,10 @@
-# sonicsensor
 
 <h1 align="center">
   <br>
-  <img src="assets/stegCloakIcon.svg" alt="StegCloak" width="100">
+  <img src="https://image.flaticon.com/icons/svg/880/880910.svg" alt="Sonic sensor" width="100">
   <br>
   <br>
-  <span>StegCloak</span>
+  <span>Sonic sensr</span>
   <br>
   <img src="https://img.shields.io/npm/l/stegcloak?style=plastic" />
   <a href="https://www.npmjs.com/package/stegcloak"> <img src="https://img.shields.io/npm/v/stegcloak?style=plastic" /> </a>
